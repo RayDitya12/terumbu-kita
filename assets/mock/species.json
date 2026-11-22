@@ -1,0 +1,9 @@
+{
+  "species": [
+    {"id": "porites", "name": "Karang Porites", "rarity": "umum", "minActions": 0},
+    {"id": "acropora", "name": "Karang Acropora", "rarity": "umum", "minActions": 10},
+    {"id": "soft-coral", "name": "Karang Lunak", "rarity": "langka", "minActions": 30},
+    {"id": "clownfish", "name": "Ikan Badut", "rarity": "langka", "minActions": 50},
+    {"id": "penyu", "name": "Penyu Sisik", "rarity": "musiman", "minActions": 70}
+  ]
+}

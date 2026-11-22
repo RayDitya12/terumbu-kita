@@ -1,0 +1,26 @@
+{
+  "campus": "Univers Contoh",
+  "leaderboard": [
+    {"name": "Rani", "xp": 460, "avatarId": 1},
+    {"name": "Dimas", "xp": 385, "avatarId": 2},
+    {"name": "Sari", "xp": 350, "avatarId": 3},
+    {"name": "Bagus", "xp": 280, "avatarId": 4},
+    {"name": "Nadia", "xp": 215, "avatarId": 5}
+  ],
+  "teams": [
+    {
+      "id": "team-pasukan-karang",
+      "name": "Pasukan Karang",
+      "memberCount": 5,
+      "weeklyContribution": 18
+    },
+    {
+      "id": "team-sadar-wisata",
+      "name": "Tim Sadar Wisata",
+      "memberCount": 4,
+      "weeklyContribution": 11
+    }
+  ],
+  "nationalCounterGrams": 1284500,
+  "joinHint": "34 teman sekampusmu sudah bergabung"
+}

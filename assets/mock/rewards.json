@@ -1,0 +1,29 @@
+{
+  "vouchers": [
+    {
+      "id": "kafe-tumbler",
+      "title": "Diskon 20% Kopi Susu",
+      "partner": "Kopi Nusa",
+      "condition": "Bawa tumbler",
+      "quotaTotal": 50,
+      "quotaLeft": 7
+    },
+    {
+      "id": "warteg-wadah",
+      "title": "Potong Rp5.000",
+      "partner": "Warteg Berkah",
+      "condition": "Bawa wadah makan",
+      "quotaTotal": 30,
+      "quotaLeft": 12
+    },
+    {
+      "id": "minuman-refill",
+      "title": "Isi Ulang Gratis",
+      "partner": "Refill Station Kota",
+      "condition": "Streak 7 hari",
+      "quotaTotal": 20,
+      "quotaLeft": 2
+    }
+  ],
+  "disclaimer": "Semua voucher adalah simulasi untuk keperluan demo."
+}
