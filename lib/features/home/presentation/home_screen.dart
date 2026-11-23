@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/game_rules.dart';
@@ -76,6 +77,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final theme = Theme.of(context);
     final profile = ref.watch(profileProvider);
     final progress = ref.watch(progressProvider);
+    final totalGrams = ref
+        .watch(actionLogsProvider)
+        .fold<double>(0, (sum, log) => sum + log.plasticGrams);
     final stage = reefStageFor(progress.totalActions);
 
     return Scaffold(
@@ -103,7 +107,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   _HeaderRow(profile: profile, stage: stage),
                   const Spacer(),
-                  _ReefSummaryCard(progress: progress, theme: theme),
+                  _ReefSummaryCard(
+                    progress: progress,
+                    totalGrams: totalGrams,
+                    theme: theme,
+                  ),
                   const SizedBox(height: 12),
                   // Tombol jempol paling bawah: aksi utama paling dekat.
                   FilledButton.icon(
@@ -114,14 +122,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       foregroundColor: Colors.black87,
                       minimumSize: const Size(0, 60),
                     ),
-                    onPressed: () {
-                      // TODO(tahap-3): buka layar Catat Aksi.
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(AppStrings.homeComingSoon),
-                        ),
-                      );
-                    },
+                    onPressed: () => context.push('/log-action'),
                   ),
                 ],
               ),
@@ -173,9 +174,14 @@ class _HeaderRow extends StatelessWidget {
 }
 
 class _ReefSummaryCard extends StatelessWidget {
-  const _ReefSummaryCard({required this.progress, required this.theme});
+  const _ReefSummaryCard({
+    required this.progress,
+    required this.totalGrams,
+    required this.theme,
+  });
 
   final Progress progress;
+  final double totalGrams;
   final ThemeData theme;
 
   @override
@@ -231,7 +237,8 @@ class _ReefSummaryCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  '0 ${AppStrings.homeImpactCompact}',
+                  '${Formatters.grams(totalGrams)} '
+                  '${AppStrings.homeImpactCompact}',
                   style: theme.textTheme.bodyMedium,
                 ),
               ],

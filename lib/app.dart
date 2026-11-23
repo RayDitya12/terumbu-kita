@@ -6,6 +6,7 @@ import 'core/constants/app_strings.dart';
 import 'core/constants/game_rules.dart';
 import 'core/providers.dart';
 import 'core/theme/app_theme.dart';
+import 'features/actions/presentation/log_action_screen.dart';
 import 'features/community/presentation/community_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/impact/presentation/impact_screen.dart';
@@ -54,6 +55,8 @@ final routerProvider = Provider<GoRouter>((ref) {
               : ActionType.tumbler,
         ),
       ),
+      // Catat Aksi dibuka sebagai layar penuh di atas shell (spec.md §6.1).
+      GoRoute(path: '/log-action', builder: (_, _) => const LogActionScreen()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),

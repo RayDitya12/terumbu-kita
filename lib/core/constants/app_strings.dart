@@ -69,12 +69,52 @@ abstract final class AppStrings {
   static const homeStreakDays = 'hari beruntun';
   static const homeImpactCompact = 'plastik dihindari';
   static const homeLogAction = 'Catat Aksi';
-  static const homeComingSoon = 'Pencatatan aksi hadir di tahap berikutnya.';
   static const reefStageNames = {
     'tunas': 'Tunas Karang',
     'tumbuh': 'Karang Tumbuh',
     'subur': 'Terumbu Subur',
     'ekosistem': 'Ekosistem Laut',
+  };
+
+  // Catat Aksi (spec.md §6.1 layar 4).
+  static const logActionTitle = 'Aksi apa yang baru kamu lakukan?';
+  static const logActionSubtitle =
+      'Satu centang kecil = satu langkah nyata untuk laut.';
+  static const actionLabels = {
+    'tumbler': 'Bawa Tumbler',
+    'tote': 'Bawa Tas Belanja',
+    'no_straw': 'Tolak Sedotan',
+    'own_container': 'Bawa Wadah Makan',
+    'refill': 'Isi Ulang Minuman',
+    'no_cutlery': 'Tolak Alat Makan Plastik',
+  };
+  static const logActionRecommended = 'Kebiasaan utamamu';
+  static const logActionPhoto = 'Lampirkan foto bukti (simulasi)';
+  static const logActionPhotoNote =
+      'Foto hanya simulasi prototipe, tidak memakai kamera.';
+  static const logActionSubmit = 'Simpan aksi';
+
+  // Win-State #2: animasi setelah aksi dicatat (spec.md §3.3).
+  static String winActionXp(int xp) => xp > 0 ? '+$xp XP' : 'Aksi tercatat';
+  static const winActionImpactLabel = 'plastik dihindari aksi ini';
+  static const winActionStreakLabel = 'hari beruntun';
+  static const winActionFreezeNote =
+      'Streak terselamatkan oleh streak freeze. Hebat, kamu konsisten!';
+  static const winActionLevelUp = 'Naik level! Sekarang Level ';
+  static const winActionBadgeNewDiver = 'Badge "Penyelam Baru" terbuka!';
+  static const winActionCapReached =
+      'Batas 10 aksi harian tercapai — XP dihitung lagi besok. '
+      'Aksi hari ini tetap dicatat dan karang tetap tumbuh.';
+  static const winActionCta = 'Lihat terumbuku';
+
+  static const badgeNames = {
+    'penyelam_baru': 'Penyelam Baru',
+    'streak_3': 'Konsisten 3 Hari',
+    'streak_7': 'Konsisten 7 Hari',
+    'streak_30': 'Konsisten 30 Hari',
+    'stage_tumbuh': 'Karang Tumbuh',
+    'stage_subur': 'Terumbu Subur',
+    'stage_ekosistem': 'Ekosistem Laut',
   };
 
   // Win-State #1: terumbu pertama lahir (spec.md §3.3).
