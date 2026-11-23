@@ -136,6 +136,10 @@ class ProfileScreen extends ConsumerWidget {
                             value: EffectQuality.hemat,
                             label: Text(AppStrings.profileQualityHemat),
                           ),
+                          ButtonSegment(
+                            value: EffectQuality.minimal,
+                            label: Text(AppStrings.profileQualityMinimal),
+                          ),
                         ],
                         selected: {settings.effectQuality},
                         onSelectionChanged: (selection) => ref
@@ -152,6 +156,13 @@ class ProfileScreen extends ConsumerWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  if (MediaQuery.disableAnimationsOf(context))
+                    Text(
+                      AppStrings.profileQualityMotionOff,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                 ],
               ),
             ),
