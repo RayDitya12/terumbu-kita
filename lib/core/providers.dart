@@ -230,11 +230,19 @@ class QuestsNotifier extends Notifier<List<Quest>> {
     return null;
   }
 
-  /// Pastikan quest harian hari [day] ada (dibuat saat pertama dibuka).
+  /// Pastikan quest harian hari [day] ada (dibuat saat pertama dibuka),
+  /// dengan progres awal = aksi yang sudah tercatat hari itu.
   Future<Quest> ensureDailyQuest(DateTime day) async {
     final existing = _findDaily(day);
     if (existing != null) return existing;
-    final quest = dailyQuestFor(day);
+    final todayCount = ref
+        .read(actionLogsProvider)
+        .where((l) => Clock.dateOnly(l.timestamp) == Clock.dateOnly(day))
+        .length;
+    final base = dailyQuestFor(day);
+    final quest = base.copyWith(
+      progress: math.min(base.targetCount, todayCount),
+    );
     state = [...state, quest];
     await _repository.saveQuests(state);
     return quest;
