@@ -6,6 +6,7 @@ import '../../../shared/widgets/sea_app_bar.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 
 /// Koleksi pengguna (spec.md §6.1 layar 8): spesies, dekorasi, badge.
 /// CD4: rasa memiliki; spesies terbuka bertahap lewat total aksi.
@@ -59,9 +60,9 @@ class CollectionScreen extends ConsumerWidget {
               children: [
                 for (final id in collection.badges)
                   Chip(
-                    avatar: const Icon(
+                    avatar: Icon(
                       Icons.workspace_premium,
-                      color: AppColors.coralInk,
+                      color: AppTheme.coralText(theme.brightness),
                     ),
                     label: Text(AppStrings.badgeNames[id] ?? id),
                   ),
@@ -125,13 +126,17 @@ class _SpeciesTile extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             name,
+            // Latar ubin terbuka selalu coralTint terang, jadi tinta gelap.
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w700,
+              color: unlocked ? AppColors.ink : null,
             ),
           ),
           Text(
             unlocked ? rarity : '${AppStrings.collectionLocked} · $hint',
-            style: theme.textTheme.labelSmall,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: unlocked ? AppColors.ink : null,
+            ),
           ),
         ],
       ),

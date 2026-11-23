@@ -10,6 +10,7 @@ import '../../../shared/widgets/sea_app_bar.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 
 /// Barang untuk mini-game Pilah Cepat (spec.md §6.1 layar 6).
 /// [recyclable] = bisa dipakai ulang (true) atau sekali pakai (false).
@@ -116,10 +117,10 @@ class _MiniGameScreenState extends ConsumerState<MiniGameScreen> {
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.emoji_events,
                     size: 72,
-                    color: AppColors.coralInk,
+                    color: AppTheme.coralText(theme.brightness),
                   ),
                   const SizedBox(height: 12),
                   Text(

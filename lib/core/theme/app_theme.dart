@@ -16,6 +16,15 @@ abstract final class AppTheme {
   static ThemeData forVariant(TerumbuThemeVariant variant) =>
       variant == TerumbuThemeVariant.b ? dark() : light();
 
+  /// Aksen koral untuk teks/ikon: versi gelap di latar terang, versi terang
+  /// di latar gelap, agar lolos kontras AA di kedua varian.
+  static Color coralText(Brightness brightness) =>
+      brightness == Brightness.dark ? AppColors.coral : AppColors.coralInk;
+
+  /// Aksen kuning untuk teks/ikon, mengikuti kecerahan latar.
+  static Color amberText(Brightness brightness) =>
+      brightness == Brightness.dark ? AppColors.sunYellow : AppColors.amberInk;
+
   static ThemeData light() => _base(Brightness.light);
   static ThemeData dark() => _base(Brightness.dark);
 

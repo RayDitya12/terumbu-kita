@@ -7,6 +7,7 @@ import '../../../shared/widgets/sea_app_bar.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 
 /// Komunitas (spec.md §6.1 layar 9) — semua data mock (spec.md §7.4).
@@ -43,7 +44,9 @@ class CommunityScreen extends ConsumerWidget {
                     ),
                     Text(
                       '${AppStrings.communityNationalLabel} · ${data.joinHint}',
-                      style: theme.textTheme.bodySmall,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.ink,
+                      ),
                     ),
                   ],
                 ),
@@ -74,7 +77,10 @@ class CommunityScreen extends ConsumerWidget {
             _SectionTitle(AppStrings.communityChallenges),
             Card(
               child: ListTile(
-                leading: const Icon(Icons.flag, color: AppColors.coralInk),
+                leading: Icon(
+                  Icons.flag,
+                  color: AppTheme.coralText(theme.brightness),
+                ),
                 title: const Text(AppStrings.communityChallengeBody),
               ),
             ),

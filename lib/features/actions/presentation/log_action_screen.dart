@@ -9,6 +9,7 @@ import '../../../core/constants/game_rules.dart';
 import '../../../core/constants/impact_constants.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/game_logic.dart';
 
@@ -232,7 +233,7 @@ class _ActionCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: showSelected
-            ? const BorderSide(color: AppColors.coralInk, width: 3)
+            ? BorderSide(color: AppTheme.coralText(theme.brightness), width: 3)
             : BorderSide.none,
       ),
       child: InkWell(
@@ -245,11 +246,14 @@ class _ActionCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (recommended && !done)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(bottom: 4),
                   child: Text(
                     AppStrings.logActionRecommended,
-                    style: TextStyle(fontSize: 10, color: AppColors.coralInk),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: AppTheme.coralText(theme.brightness),
+                    ),
                   ),
                 ),
               Icon(
@@ -257,7 +261,7 @@ class _ActionCard extends StatelessWidget {
                 color: done
                     ? AppColors.teal
                     : selected
-                    ? AppColors.coralInk
+                    ? AppTheme.coralText(theme.brightness)
                     : null,
               ),
               const SizedBox(height: 6),
@@ -310,7 +314,7 @@ class _WinStateSheet extends StatelessWidget {
               child: Icon(
                 outcome.firstAction ? Icons.eco : Icons.waves,
                 size: 64,
-                color: AppColors.coralInk,
+                color: AppTheme.coralText(theme.brightness),
               ),
             ),
             const SizedBox(height: 12),
@@ -348,7 +352,7 @@ class _WinStateSheet extends StatelessWidget {
                 line,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.amberInk,
+                  color: AppTheme.amberText(theme.brightness),
                   fontWeight: FontWeight.w700,
                 ),
               ),

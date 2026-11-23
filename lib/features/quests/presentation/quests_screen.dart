@@ -8,6 +8,7 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/game_rules.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/chest.dart';
 import '../../../core/utils/clock.dart';
 import '../../../data/models/quest.dart';
@@ -97,9 +98,9 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.card_giftcard,
-                        color: AppColors.coralInk,
+                        color: AppTheme.coralText(theme.brightness),
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -138,6 +139,8 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
           Card(
             color: AppColors.coralTint,
             child: ListTile(
+              // Latar tint selalu terang, jadi teks & ikon pakai tinta gelap.
+              textColor: AppColors.ink,
               iconColor: AppColors.coralInk,
               leading: const Icon(Icons.local_activity),
               title: const Text(AppStrings.eventTitle),

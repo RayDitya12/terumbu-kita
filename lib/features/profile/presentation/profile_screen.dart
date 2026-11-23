@@ -174,19 +174,24 @@ class ProfileScreen extends ConsumerWidget {
                         AppStrings.demoModeTitle,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
+                          color: AppColors.ink,
                         ),
                       ),
                     ],
                   ),
                   Text(
                     AppStrings.demoModeSubtitle,
-                    style: theme.textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.ink,
+                    ),
                   ),
                   Text(
                     '${AppStrings.demoOffsetLabel}'
                     '${settings.simulatedDateOffsetDays}'
                     '${AppStrings.demoOffsetDays}',
-                    style: theme.textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.ink,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Wrap(

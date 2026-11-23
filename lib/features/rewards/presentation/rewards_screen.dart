@@ -5,7 +5,7 @@ import '../../../shared/widgets/sea_app_bar.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 
 /// Hadiah voucher mock (spec.md §6.1 layar 10).
 /// CD6: kuota terbatas + label "simulasi" — tidak pernah menjanjikan
@@ -35,9 +35,9 @@ class RewardsScreen extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.confirmation_number,
-                            color: AppColors.coralInk,
+                            color: AppTheme.coralText(theme.brightness),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
