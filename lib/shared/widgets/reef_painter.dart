@@ -251,7 +251,7 @@ class ReefPainter extends CustomPainter {
         ..setFloat(0, size.width)
         ..setFloat(1, size.height)
         ..setFloat(2, s.time)
-        ..setFloat(3, 0.28 * _vitality);
+        ..setFloat(3, 0.35 * _vitality);
       _stroke
         ..shader = shader
         ..blendMode = BlendMode.screen;
@@ -349,28 +349,39 @@ class ReefPainter extends CustomPainter {
   // ---------------------------------------------------------------- karang
 
   void _drawCorals(Canvas canvas, Size size, double groundY, ReefVisualState s) {
-    final areaHeight = size.height * 0.62;
+    final areaHeight = size.height * 0.58;
     final scale = 0.82 + 0.18 * s.growth;
     final corals = s.layout.corals;
-    for (var i = 0; i < corals.length; i++) {
-      final spec = corals[i];
-      // Karang terbaru (indeks terakhir) "tumbuh" saat pop < 1.
-      final popScale = i == corals.length - 1 ? _easeOut(s.pop) : 1.0;
-      final factor = scale * popScale;
-      final color = _color(spec.colorIndex, s);
-      final base = Offset(spec.x * size.width, groundY + 6);
-      final height = areaHeight * spec.height * factor;
-      switch (spec.species) {
-        case CoralSpecies.branching:
-          _drawBranching(canvas, base, height, color, spec, s);
-        case CoralSpecies.seaweed:
-          _drawSeaweed(canvas, base, height, color, spec, s);
-        case CoralSpecies.table:
-          _drawTable(canvas, base, height, color, spec);
-        case CoralSpecies.brain:
-          _drawBrain(canvas, base, height, color, spec);
-        case CoralSpecies.seaFan:
-          _drawSeaFan(canvas, base, height, color, spec);
+    // Dua pass: spesies besar (meja/otak) di belakang, yang ramping di depan.
+    for (var pass = 0; pass < 2; pass++) {
+      final backPass = pass == 0;
+      for (var i = 0; i < corals.length; i++) {
+        final spec = corals[i];
+        final isBack =
+            spec.species == CoralSpecies.table ||
+            spec.species == CoralSpecies.brain;
+        if (isBack != backPass) continue;
+        // Karang terbaru (indeks terakhir) "tumbuh" saat pop < 1.
+        final popScale = i == corals.length - 1 ? _easeOut(s.pop) : 1.0;
+        final factor = scale * popScale;
+        final color = _color(spec.colorIndex, s);
+        final base = Offset(
+          size.width * 0.05 + spec.x * size.width * 0.9,
+          groundY + 6,
+        );
+        final height = areaHeight * spec.height * factor;
+        switch (spec.species) {
+          case CoralSpecies.branching:
+            _drawBranching(canvas, base, height, color, spec, s);
+          case CoralSpecies.seaweed:
+            _drawSeaweed(canvas, base, height, color, spec, s);
+          case CoralSpecies.table:
+            _drawTable(canvas, base, height, color, spec);
+          case CoralSpecies.brain:
+            _drawBrain(canvas, base, height, color, spec);
+          case CoralSpecies.seaFan:
+            _drawSeaFan(canvas, base, height, color, spec);
+        }
       }
     }
   }
@@ -490,13 +501,13 @@ class ReefPainter extends CustomPainter {
     _stroke
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 7;
+      ..strokeWidth = 6;
     _path
       ..reset()
       ..moveTo(base.dx, base.dy)
       ..quadraticBezierTo(base.dx + 8, top.dy + height * 0.5, top.dx, top.dy);
     canvas.drawPath(_path, _stroke);
-    final width = height * 1.15 + 18;
+    final width = height * 0.95 + 10;
     _fill.color = color;
     canvas.drawOval(
       Rect.fromCenter(center: top, width: width, height: width * 0.22),
@@ -528,29 +539,32 @@ class ReefPainter extends CustomPainter {
     CoralSpec spec,
   ) {
     final mound = Rect.fromCenter(
-      center: base - Offset(0, height * 0.32),
-      width: height * 1.1,
-      height: height * 0.72,
+      center: base - Offset(0, height * 0.24),
+      width: height * 0.85,
+      height: height * 0.58,
     );
     _fill.color = color;
     canvas.drawOval(mound, _fill);
-    // Alur berkelok: empat pita horizontal di dalam kubah.
+    // Alur berkelok: empat pita horizontal, terpotong sesuai lebar oval.
     _stroke
       ..color = ui.Color.lerp(color, Colors.black, 0.3)!
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.4;
     final rng = math.Random(spec.seed.toInt());
+    final cx = mound.center.dx;
     for (var g = 0; g < 4; g++) {
-      final gy = mound.top + mound.height * (0.24 + 0.16 * g);
+      final gy = mound.center.dy - mound.height * 0.28 + mound.height * 0.19 * g;
+      final k = ((gy - mound.center.dy) / (mound.height / 2)).clamp(-0.9, 0.9);
+      final halfW = mound.width / 2 * math.sqrt(1 - k * k) - 5;
+      final w = halfW * 2;
       _path
         ..reset()
-        ..moveTo(mound.left + 6, gy);
-      final w = mound.width - 12;
+        ..moveTo(cx - halfW, gy);
       for (var x = 0.25; x <= 1.0; x += 0.25) {
         _path.quadraticBezierTo(
-          mound.left + 6 + w * (x - 0.125),
+          cx - halfW + w * (x - 0.125),
           gy + (g.isEven ? 5 : -5) * (0.6 + rng.nextDouble() * 0.8),
-          mound.left + 6 + w * x,
+          cx - halfW + w * x,
           gy,
         );
       }
