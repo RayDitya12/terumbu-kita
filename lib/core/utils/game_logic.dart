@@ -37,9 +37,7 @@ double reefGrowthFraction(int totalActions) {
   final stage = reefStageFor(totalActions);
   final index = stages.indexOf(stage);
   final lo = stage.minActions;
-  final hi = index + 1 < stages.length
-      ? stages[index + 1].minActions
-      : lo + 20;
+  final hi = index + 1 < stages.length ? stages[index + 1].minActions : lo + 20;
   return ((totalActions - lo + 1) / (hi - lo)).clamp(0.0, 1.0);
 }
 

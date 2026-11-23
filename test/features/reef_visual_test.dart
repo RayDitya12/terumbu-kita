@@ -23,10 +23,7 @@ void main() {
     testWidgets('Home memakai ReefScene dan tetap settle tanpa animasi', (
       tester,
     ) async {
-      await pumpTerumbuApp(
-        tester,
-        profile: _profile,
-      );
+      await pumpTerumbuApp(tester, profile: _profile);
       expect(find.byType(ReefScene), findsOneWidget);
       expect(find.byType(HomeScreen), findsOneWidget);
     });
@@ -34,10 +31,7 @@ void main() {
     testWidgets('setelan Kualitas efek tersimpan lokal dan default Penuh', (
       tester,
     ) async {
-      final repository = await pumpTerumbuApp(
-        tester,
-        profile: _profile,
-      );
+      final repository = await pumpTerumbuApp(tester, profile: _profile);
 
       await tester.tap(find.text(AppStrings.navProfile));
       await tester.pumpAndSettle();

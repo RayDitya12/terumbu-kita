@@ -349,9 +349,8 @@ class ReefPainter extends CustomPainter {
     canvas.drawPath(_path, _fill);
     for (final rock in s.layout.rocks) {
       final cx = rock.x * size.width;
-      _fill.color = const Color(0xFF33566A).withValues(
-        alpha: 0.55 + 0.25 * _vitality,
-      );
+      _fill.color = const Color(0xFF33566A)
+          .withValues(alpha: 0.55 + 0.25 * _vitality);
       canvas.drawOval(
         Rect.fromCenter(
           center: Offset(cx, top + 6),
@@ -365,7 +364,12 @@ class ReefPainter extends CustomPainter {
 
   // ---------------------------------------------------------------- karang
 
-  void _drawCorals(Canvas canvas, Size size, double groundY, ReefVisualState s) {
+  void _drawCorals(
+    Canvas canvas,
+    Size size,
+    double groundY,
+    ReefVisualState s,
+  ) {
     final areaHeight = size.height * 0.58;
     final scale = 0.82 + 0.18 * s.growth;
     final corals = s.layout.corals;
@@ -579,7 +583,8 @@ class ReefPainter extends CustomPainter {
     final rng = math.Random(spec.seed.toInt());
     final cx = mound.center.dx;
     for (var g = 0; g < 4; g++) {
-      final gy = mound.center.dy - mound.height * 0.28 + mound.height * 0.19 * g;
+      final gy =
+          mound.center.dy - mound.height * 0.28 + mound.height * 0.19 * g;
       final k = ((gy - mound.center.dy) / (mound.height / 2)).clamp(-0.9, 0.9);
       final halfW = mound.width / 2 * math.sqrt(1 - k * k) - 5;
       final w = halfW * 2;
@@ -672,12 +677,7 @@ class ReefPainter extends CustomPainter {
     }
   }
 
-  void _drawBurst(
-    Canvas canvas,
-    Size size,
-    double groundY,
-    ReefVisualState s,
-  ) {
+  void _drawBurst(Canvas canvas, Size size, double groundY, ReefVisualState s) {
     if (s.burst >= 1) return;
     final p = _easeOut(s.burst);
     final alpha = (1 - s.burst) * 0.45;
@@ -688,7 +688,8 @@ class ReefPainter extends CustomPainter {
       ..strokeWidth = 2;
     for (var i = 0; i < 14; i++) {
       final a = i * _tau / 14 + 0.3;
-      final pos = center + Offset(math.cos(a) * spread, math.sin(a) * spread * 0.6);
+      final pos =
+          center + Offset(math.cos(a) * spread, math.sin(a) * spread * 0.6);
       canvas.drawCircle(pos, 5 * (1 - p) + 1.5, _stroke);
     }
   }
@@ -699,7 +700,8 @@ class ReefPainter extends CustomPainter {
     canvas.drawRect(Offset.zero & size, _fill);
   }
 
-  double _easeOut(double t) => 1 - math.pow(1 - t.clamp(0.0, 1.0), 3).toDouble();
+  double _easeOut(double t) =>
+      1 - math.pow(1 - t.clamp(0.0, 1.0), 3).toDouble();
 
   @override
   bool shouldRepaint(covariant ReefPainter oldDelegate) =>
