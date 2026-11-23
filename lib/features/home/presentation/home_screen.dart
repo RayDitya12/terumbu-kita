@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -83,51 +84,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         .fold<double>(0, (sum, log) => sum + log.plasticGrams);
     final stage = reefStageFor(progress.totalActions);
 
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const DecoratedBox(
-            decoration: BoxDecoration(gradient: reefBackgroundGradient),
-          ),
-          // Area terumbu: dari bawah judul sampai tepat di atas kartu ringkasan.
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 268,
-            top: MediaQuery.sizeOf(context).height * 0.16,
-            child: const ReefScene(),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _HeaderRow(profile: profile, stage: stage),
-                  const Spacer(),
-                  _ReefSummaryCard(
-                    progress: progress,
-                    totalGrams: totalGrams,
-                    theme: theme,
-                  ),
-                  const SizedBox(height: 12),
-                  // Tombol jempol paling bawah: aksi utama paling dekat.
-                  FilledButton.icon(
-                    icon: const Icon(Icons.add_circle_outline),
-                    label: const Text(AppStrings.homeLogAction),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.coral,
-                      foregroundColor: AppColors.ink,
-                      minimumSize: const Size(0, 60),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // Scene Home gelap; AppBar layar lain mengatur dirinya sendiri.
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            const DecoratedBox(
+              decoration: BoxDecoration(gradient: reefBackgroundGradient),
+            ),
+            // Area terumbu: dari bawah judul sampai tepat di atas kartu ringkasan.
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 268,
+              top: MediaQuery.sizeOf(context).height * 0.16,
+              child: const ReefScene(),
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _HeaderRow(profile: profile, stage: stage),
+                    const Spacer(),
+                    _ReefSummaryCard(
+                      progress: progress,
+                      totalGrams: totalGrams,
+                      theme: theme,
                     ),
-                    onPressed: () => context.push('/log-action'),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    // Tombol jempol paling bawah: aksi utama paling dekat.
+                    FilledButton.icon(
+                      icon: const Icon(Icons.add_circle_outline),
+                      label: const Text(AppStrings.homeLogAction),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.coral,
+                        foregroundColor: AppColors.ink,
+                        minimumSize: const Size(0, 60),
+                      ),
+                      onPressed: () => context.push('/log-action'),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
