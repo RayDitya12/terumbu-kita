@@ -219,6 +219,7 @@ class ReefPainter extends CustomPainter {
     ..style = PaintingStyle.stroke;
   final Paint _fill = Paint()..style = PaintingStyle.fill;
   final Path _path = Path();
+  final Path _maskPath = Path();
   final Paint _layer = Paint();
   bool _silhouette = false;
   ui.FragmentShader? _shader;
@@ -283,12 +284,17 @@ class ReefPainter extends CustomPainter {
     double groundY,
     ReefVisualState s,
   ) {
+    final program = s.causticsProgram;
+    // Fallback pita: layer dibatasi alpha global; shader sudah modulasi
+    // alpha per-piksel lewat dstIn.
+    _layer.color = program == null
+        ? Colors.white.withValues(alpha: 0.3 * _vitality)
+        : const Color(0xFFFFFFFF);
     canvas.saveLayer(Offset.zero & size, _layer);
     _silhouette = true;
     _drawSeabed(canvas, size, s);
     _drawCorals(canvas, size, groundY, s);
     _silhouette = false;
-    final program = s.causticsProgram;
     if (program != null) {
       final shader = _shader ??= program.fragmentShader();
       shader
@@ -309,35 +315,47 @@ class ReefPainter extends CustomPainter {
     canvas.restore();
   }
 
-  /// Fallback dua lapis pita cahaya bergeser berlawanan (item 3 Unit B),
-  /// ikut ter-potong oleh layer siluet saat mode Hemat.
+  /// Fallback dua lapis pita cahaya bergeser berlawanan (item 3 Unit B).
+  /// dstIn hanya menyentuh piksel yang tercakup gambarnya, jadi pita tipis
+  /// tidak bisa menghapus siluet di luarnya. Sebagai gantinya, path even-odd
+  /// (layar penuh minus pita) di-blend dstOut: yang tersisa hanya siluet
+  /// di dalam pita, lalu di-composite lewat alpha [_layer].
   void _drawCausticsFallback(Canvas canvas, Size size, ReefVisualState s) {
-    final alpha = 0.06 * _vitality;
+    const bandHalf = 7.0;
+    final steps = (size.width / 40).ceil();
+    _maskPath
+      ..reset()
+      ..fillType = PathFillType.evenOdd
+      ..addRect(Offset.zero & size);
     for (var layer = 0; layer < 2; layer++) {
       final dir = layer == 0 ? 1.0 : -1.0;
       final drift = s.time * 0.35 * dir + layer * 2.1;
       for (var band = 0; band < 4; band++) {
         final baseY = size.height * (0.42 + 0.14 * band) + layer * 10;
-        _path
-          ..reset()
-          ..moveTo(0, baseY);
-        for (var x = 20.0; x <= size.width; x += 40) {
-          _path.quadraticBezierTo(
-            x - 20,
-            baseY + math.sin(x * 0.02 + drift + band) * 14,
+        final phase = drift + band;
+        _maskPath.moveTo(0, baseY + math.sin(phase) * 14 - bandHalf);
+        for (var i = 1; i <= steps; i++) {
+          final x = i * 40.0;
+          _maskPath.lineTo(
             x,
-            baseY + math.sin((x + 20) * 0.02 + drift + band) * 14,
+            baseY + math.sin(x * 0.02 + phase) * 14 - bandHalf,
           );
         }
-        // Pita tipis: garis tebal, bukan area terisi.
-        _stroke
-          ..color = Colors.white.withValues(alpha: alpha)
-          ..strokeWidth = 7
-          ..blendMode = BlendMode.dstIn;
-        canvas.drawPath(_path, _stroke);
+        for (var i = steps; i >= 0; i--) {
+          final x = i * 40.0;
+          _maskPath.lineTo(
+            x,
+            baseY + math.sin(x * 0.02 + phase) * 14 + bandHalf,
+          );
+        }
+        _maskPath.close();
       }
     }
-    _stroke.blendMode = BlendMode.srcOver;
+    _fill
+      ..color = _silhouetteColor
+      ..blendMode = BlendMode.dstOut;
+    canvas.drawPath(_maskPath, _fill);
+    _fill.blendMode = BlendMode.srcOver;
   }
 
   void _drawLightRays(Canvas canvas, Size size, ReefVisualState s) {
