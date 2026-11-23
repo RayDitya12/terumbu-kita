@@ -231,9 +231,10 @@ class ReefPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final s = state;
     final groundY = size.height - _sandTop;
-    if (s.showRays) _drawLightRays(canvas, size, s);
     _drawSeabed(canvas, size, s);
     _drawCorals(canvas, size, groundY, s);
+    // Rays setelah dasar: berkas cahaya tampak menyambung sampai ke pasir.
+    if (s.showRays) _drawLightRays(canvas, size, s);
     // Caustics setelah karang: pola cahaya dipotong tepat pada siluet
     // karang + pasir (layer dstIn), bukan aura di sekitarnya.
     if (s.showCaustics) _drawCaustics(canvas, size, groundY, s);
@@ -348,8 +349,8 @@ class ReefPainter extends CustomPainter {
         ..reset()
         ..moveTo(top - 7, 0)
         ..lineTo(top + 7, 0)
-        ..lineTo(bottom + 34, size.height * 0.82)
-        ..lineTo(bottom - 34, size.height * 0.82)
+        ..lineTo(bottom + 46, size.height)
+        ..lineTo(bottom - 46, size.height)
         ..close();
       _fill.color = Colors.white.withValues(
         alpha: (0.05 + 0.025 * math.sin(s.time * 0.17 + i * 1.9)) * _vitality,
