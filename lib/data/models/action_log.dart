@@ -26,7 +26,7 @@ class ActionLog {
   final String actionType;
   final DateTime timestamp;
 
-  /// XP yang benar-benar diberikan (0 bila melewati batas harian).
+  /// XP yang benar-benar diberikan aksi ini (termasuk bonus Hari Sempurna).
   final int xpGained;
   final double plasticGrams;
   final String? note;

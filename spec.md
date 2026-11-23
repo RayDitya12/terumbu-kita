@@ -50,7 +50,7 @@ Metrik ini dipakai di laporan. Angka target bersifat **asumsi desain** dan harus
 
 | Metrik | Target (asumsi) | Cara ukur di prototipe |
 |---|---|---|
-| Aksi bebas plastik per pengguna aktif per minggu | ≥ 5 aksi | Counter aksi di Impact screen |
+| Aksi bebas plastik per pengguna aktif per minggu | ≥ 12 aksi (setara target mingguan §7.2) | Counter aksi di Impact screen |
 | Retensi 7 hari | ≥ 40% | Streak & hari aktif |
 | Estimasi plastik sekali pakai yang dihindari | Ditampilkan kumulatif (gram/item) | Kalkulasi dari konstanta dampak (§7.3) |
 | Penyelesaian onboarding | ≥ 80% | Flag `onboardingDone` |
@@ -74,7 +74,8 @@ Metrik ini dipakai di laporan. Angka target bersifat **asumsi desain** dan harus
 | 2 | Mencatat aksi bebas plastik pertama | Karang pertama tumbuh + badge "Penyelam Baru" |
 | 3 | Mencatat aksi secara rutin (streak 3 → 7 → 30 hari) | Terumbu naik tahap + badge streak |
 | 4 | Menyelesaikan Daily Quest | XP bonus + peluang Mystery Chest |
-| 5 | Mencapai target mingguan (mis. 5 aksi) | Spesies baru dibuka + notifikasi pencapaian |
+| 5 | Mencapai target mingguan (12 aksi) | Spesies baru dibuka + notifikasi pencapaian |
+| 5b | Hari Sempurna: mencatat keenam jenis aksi dalam satu hari | +10 XP bonus + pesan perayaan khusus |
 | 6 | Bergabung di tim/komunitas dan ikut tantangan | Kontribusi tim naik + badge sosial |
 | 7 | Menjadi mentor (membagikan tips/mengundang teman) | Gelar "Penjaga Karang" |
 
@@ -199,12 +200,17 @@ Bottom navigation: **Home · Quest · Dampak · Komunitas · Profil**. Layar lai
 
 > **Penting:** gram per item adalah **asumsi placeholder** (`lib/core/constants/impact_constants.dart`). Tim harus mengganti dengan angka bersumber dan mencantumkan sitasinya di laporan.
 
+> **Aturan pencatatan:** tiap jenis aksi hanya dapat dicatat **1× per hari kalender** (lihat §7.2). Yang dihargai adalah keberagaman kebiasaan, bukan frekuensi; jenis yang sudah dicatat hari itu tampil berstatus "selesai hari ini".
+
 ### 7.2 Progres
 - **Level:** `xpNeeded(level) = 50 + 25 * (level - 1)` (mudah dituning).
-- **Tahap terumbu:** Tunas (0–9 aksi), Tumbuh (10–29), Subur (30–69), Ekosistem (70+).
+- **Tahap terumbu:** Tunas (0–5 aksi), Tumbuh (6–17), Subur (18–39), Ekosistem (40+). Ambang total aksi kumulatif ini tercapai ±1–7 hari dengan aturan 1×/jenis/hari.
 - **Streak:** bertambah jika ada ≥1 aksi di hari kalender yang berbeda; putus jika 1 hari terlewat, kecuali ada *streak freeze* (maks. 2, didapat dari quest/chest).
 - **Karang memudar:** setelah 3 hari tanpa aksi, tingkat kesehatan karang turun bertahap; pulih penuh dengan 1 aksi. Selalu tampilkan pesan yang memotivasi, bukan menghukum.
-- **Batas aksi harian:** maks. 10 aksi/hari yang menghasilkan XP (mencegah *abuse*).
+- **Batas aksi harian:** tiap jenis aksi hanya 1× per hari kalender (maks. 6 aksi/hari). Tidak ada lagi batas 10 aksi/hari — aturan per-jenis inilah pencegah *abuse*. Plafon XP harian = **55 XP aksi + 10 XP Hari Sempurna + hadiah Daily Quest**.
+- **Hari Sempurna:** jika keenam jenis aksi tercatat dalam satu hari, tambah +10 XP dan pesan perayaan.
+- **Daily Quest (rotasi 2 hari):** genap → "Catat 3 aksi bebas plastik hari ini"; gasal → "Coba 2 jenis aksi yang belum kamu catat 3 hari terakhir". Hadiah 15 XP.
+- **Target mingguan:** 12 aksi per minggu (Sen–Min).
 - **Mystery Chest:** 1x/hari setelah Daily Quest selesai; hadiah acak berbobot (XP, streak freeze, dekorasi, fakta).
 
 ### 7.3 Model data (disimpan lokal sebagai JSON)
@@ -297,9 +303,9 @@ Dipetakan ke rubrik penilaian (total 100%).
 
 **Checklist fungsional minimum (MVP):**
 - [ ] Onboarding + Glowing Choice, lalu masuk Home
-- [ ] Catat aksi menambah XP, plastik dihindari, dan pertumbuhan terumbu
-- [ ] Animasi Win-State setelah aksi dicatat
-- [ ] Streak, level, dan target mingguan bekerja
+- [ ] Catat aksi menambah XP, plastik dihindari, dan pertumbuhan terumbu; tiap jenis maks. 1× per hari dan kartu berstatus "selesai hari ini" setelah dicatat
+- [ ] Animasi Win-State setelah aksi dicatat; Hari Sempurna (6 jenis dalam sehari) memberi +10 XP
+- [ ] Streak, level, dan target mingguan (12 aksi) bekerja; Daily Quest berotasi tiap hari
 - [ ] Daily Quest + Mystery Chest
 - [ ] Layar Dampak dengan grafik mingguan
 - [ ] Koleksi (spesies, badge) bertambah sesuai progres

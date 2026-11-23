@@ -83,14 +83,66 @@ final profileProvider = NotifierProvider<ProfileNotifier, UserProfile?>(
   () => throw UnimplementedError('di-override di main()'),
 );
 
+/// Keadaan sebelum aksi terakhir, supaya "Batalkan" bisa mengembalikan
+/// XP/level/streak/totalActions secara persis (spec.md §7.2 Unit A).
+class LastActionSnapshot {
+  const LastActionSnapshot({
+    required this.logId,
+    required this.progress,
+    required this.badges,
+  });
+
+  factory LastActionSnapshot.fromJson(Map<String, dynamic> json) =>
+      LastActionSnapshot(
+        logId: json['logId'] is String ? json['logId'] as String : '',
+        progress: json['progress'] is Map<String, dynamic>
+            ? Progress.fromJson(json['progress'] as Map<String, dynamic>)
+            : const Progress(),
+        badges: json['badges'] is List
+            ? (json['badges'] as List).whereType<String>().toList()
+            : const [],
+      );
+
+  final String logId;
+  final Progress progress;
+  final List<String> badges;
+
+  Map<String, dynamic> toJson() => {
+    'logId': logId,
+    'progress': progress.toJson(),
+    'badges': badges,
+  };
+}
+
 class ProgressNotifier extends Notifier<Progress> {
-  ProgressNotifier(this._repository, this._initial);
+  ProgressNotifier(this._repository, this._initial, [this._snapshot]);
 
   final LocalStorageRepository _repository;
   final Progress _initial;
 
+  LastActionSnapshot? _snapshot;
+
   @override
   Progress build() => _initial;
+
+  /// Tombol "Batalkan" aktif hanya untuk log terakhir hari ini (spec §7.2
+  /// Unit A, poin 10). Hadiah quest yang sudah dikumpulkan tidak ditarik.
+  bool get canCancelLastAction {
+    final snapshot = _snapshot;
+    if (snapshot == null || snapshot.logId.isEmpty) return false;
+    final today = ref.read(clockProvider).today;
+    final todayLogs = ref
+        .read(actionLogsProvider)
+        .where((l) => Clock.dateOnly(l.timestamp) == today)
+        .toList();
+    if (todayLogs.isEmpty) return false;
+    final target = todayLogs.where((l) => l.id == snapshot.logId).firstOrNull;
+    if (target == null) return false;
+    final last = todayLogs.reduce(
+      (a, b) => a.timestamp.isAfter(b.timestamp) ? a : b,
+    );
+    return last.id == target.id;
+  }
 
   Future<void> save(Progress progress) async {
     state = progress;
@@ -110,47 +162,70 @@ class ProgressNotifier extends Notifier<Progress> {
   }
 
   /// Mencatat satu aksi bebas plastik (spec.md §6.1 layar 4).
-  /// Mengembalikan [ActionOutcome] untuk animasi Win-State.
-  Future<ActionOutcome> logAction(ActionType type) async {
+  /// Mengembalikan [ActionOutcome] untuk animasi Win-State, atau null jika
+  /// jenis ini sudah dicatat hari ini (1×/jenis/hari, spec.md §7.2 Unit A).
+  Future<ActionOutcome?> logAction(ActionType type) async {
     final clock = ref.read(clockProvider);
     final today = clock.today;
-    final actionsToday = ref
-        .read(actionLogsProvider)
-        .where((log) => Clock.dateOnly(log.timestamp) == today)
-        .length;
+    final loggedTypes = loggedTypeIdsOnDay(ref.read(actionLogsProvider), today);
+    if (loggedTypes.contains(type.id)) return null;
 
+    final progressBefore = state;
     final outcome = applyAction(
       progress: state,
       type: type,
       today: today,
-      actionsToday: actionsToday,
+      typesCompletedToday: loggedTypes.length + 1,
     );
-    await save(outcome.progress);
 
-    await ref
-        .read(actionLogsProvider.notifier)
-        .add(
-          ActionLog(
-            id: 'log-${clock.now.microsecondsSinceEpoch}',
-            actionType: type.id,
-            timestamp: clock.now,
-            xpGained: outcome.xpGained,
-            plasticGrams: outcome.grams,
-          ),
-        );
+    final log = ActionLog(
+      id: 'log-${clock.now.microsecondsSinceEpoch}',
+      actionType: type.id,
+      timestamp: clock.now,
+      xpGained: outcome.xpGained,
+      plasticGrams: outcome.grams,
+    );
+    final addedBadges = <String>[
+      if (outcome.firstAction) 'penyelam_baru',
+      if (outcome.streakMilestone != null) 'streak_${outcome.streakMilestone}',
+      if (outcome.stageUp != null) 'stage_${outcome.stageUp!.name}',
+    ];
+    _snapshot = LastActionSnapshot(
+      logId: log.id,
+      progress: progressBefore,
+      badges: addedBadges,
+    );
+    await _repository.saveActionSnapshot(_snapshot!.toJson());
+
+    await save(outcome.progress);
+    await ref.read(actionLogsProvider.notifier).add(log);
 
     final badges = ref.read(collectionProvider.notifier);
-    if (outcome.firstAction) await badges.addBadge('penyelam_baru');
-    if (outcome.streakMilestone != null) {
-      await badges.addBadge('streak_${outcome.streakMilestone}');
-    }
-    if (outcome.stageUp != null) {
-      await badges.addBadge('stage_${outcome.stageUp!.name}');
+    for (final id in addedBadges) {
+      await badges.addBadge(id);
     }
 
     // CD2 + CD7: aksi memajukan Daily Quest; hadiah XP diberikan saat selesai.
-    await ref.read(questsProvider.notifier).addProgress(today, 1);
+    await ref.read(questsProvider.notifier).refreshDailyQuest(today);
     return outcome;
+  }
+
+  /// Membatalkan aksi terakhir hari ini (spec.md §7.2 Unit A): memulihkan
+  /// snapshot progres, menghapus log, menarik badge, dan menyegarkan quest.
+  Future<bool> cancelLastAction() async {
+    if (!canCancelLastAction) return false;
+    final snapshot = _snapshot!;
+    final today = ref.read(clockProvider).today;
+    await save(snapshot.progress);
+    await ref.read(actionLogsProvider.notifier).remove(snapshot.logId);
+    final badges = ref.read(collectionProvider.notifier);
+    for (final id in snapshot.badges) {
+      await badges.removeBadge(id);
+    }
+    _snapshot = null;
+    await _repository.clearActionSnapshot();
+    await ref.read(questsProvider.notifier).refreshDailyQuest(today);
+    return true;
   }
 
   /// XP bonus dari luar aksi (hadiah quest). Level-up berantai berlaku sama.
@@ -180,7 +255,7 @@ class ProgressNotifier extends Notifier<Progress> {
           progress: progress,
           type: types[i],
           today: day,
-          actionsToday: i,
+          typesCompletedToday: i + 1,
         );
         progress = outcome.progress;
         logs.add(
@@ -195,6 +270,7 @@ class ProgressNotifier extends Notifier<Progress> {
       }
     }
     await ref.read(actionLogsProvider.notifier).replaceAll(logs);
+    _snapshot = null;
     await save(progress);
     final profile = ref.read(profileProvider);
     if (profile == null || !profile.onboardingDone) {
@@ -217,6 +293,7 @@ class ProgressNotifier extends Notifier<Progress> {
   /// Demo Mode "reset data" (spec.md §8): kosongkan penyimpanan & state.
   Future<void> resetAll() async {
     await _repository.clearAll();
+    _snapshot = null;
     await save(const Progress());
     await ref.read(actionLogsProvider.notifier).replaceAll(const []);
     await ref.read(questsProvider.notifier).replaceAll(const []);
@@ -248,6 +325,11 @@ class ActionLogsNotifier extends Notifier<List<ActionLog>> {
     state = List.unmodifiable(logs);
     await _repository.saveActionLogs(state);
   }
+
+  Future<void> remove(String id) async {
+    state = state.where((log) => log.id != id).toList(growable: false);
+    await _repository.saveActionLogs(state);
+  }
 }
 
 final actionLogsProvider =
@@ -267,6 +349,14 @@ class CollectionNotifier extends Notifier<Collection> {
   Future<void> addBadge(String badgeId) async {
     if (state.badges.contains(badgeId)) return;
     state = state.copyWith(badges: [...state.badges, badgeId]);
+    await _repository.saveCollection(state);
+  }
+
+  Future<void> removeBadge(String badgeId) async {
+    if (!state.badges.contains(badgeId)) return;
+    state = state.copyWith(
+      badges: state.badges.where((b) => b != badgeId).toList(),
+    );
     await _repository.saveCollection(state);
   }
 
@@ -310,41 +400,41 @@ class QuestsNotifier extends Notifier<List<Quest>> {
     return null;
   }
 
-  /// Pastikan quest harian hari [day] ada (dibuat saat pertama dibuka),
-  /// dengan progres awal = aksi yang sudah tercatat hari itu.
-  Future<Quest> ensureDailyQuest(DateTime day) async {
-    final existing = _findDaily(day);
-    if (existing != null) return existing;
-    final todayCount = ref
-        .read(actionLogsProvider)
-        .where((l) => Clock.dateOnly(l.timestamp) == Clock.dateOnly(day))
-        .length;
-    final base = dailyQuestFor(day);
-    final quest = base.copyWith(
-      progress: math.min(base.targetCount, todayCount),
-    );
-    state = [...state, quest];
-    await _repository.saveQuests(state);
-    return quest;
+  /// Progres hari [day] dihitung ulang dari log (bukan delta), sesuai
+  /// jenis quest yang berotasi (spec.md §7.2 Unit A).
+  int _progressFromLogs(DateTime day) {
+    final logs = ref.read(actionLogsProvider);
+    return switch (dailyQuestKind(day)) {
+      DailyQuestKind.count =>
+        logs
+            .where((l) => Clock.dateOnly(l.timestamp) == Clock.dateOnly(day))
+            .length,
+      DailyQuestKind.variety => newTypeCountToday(logs, day),
+    };
   }
 
-  /// Menambahkan progres ke Daily Quest [day]; memberi hadiah XP saat
-  /// quest baru selesai (Win-State #4).
-  Future<Quest?> addProgress(DateTime day, int delta) async {
-    final quest = await ensureDailyQuest(day);
-    final progress = math.min(quest.targetCount, quest.progress + delta);
-    final nowCompleted = !quest.completed && progress >= quest.targetCount;
-    final updated = quest.copyWith(progress: progress);
-    state = [for (final q in state) q.id == quest.id ? updated : q];
+  /// Pastikan quest harian hari [day] ada, lalu sinkronkan progresnya
+  /// dengan log hari ini; memberi hadiah XP saat quest baru selesai
+  /// (Win-State #4). Mengembalikan quest yang baru selesai, atau null.
+  Future<Quest?> refreshDailyQuest(DateTime day) async {
+    final base = dailyQuestFor(day);
+    final existing = _findDaily(day);
+    final progress = math.min(base.targetCount, _progressFromLogs(day));
+    final updated = (existing ?? base).copyWith(progress: progress);
+    final nowCompleted = !updated.completed && progress >= base.targetCount;
+    final quest = nowCompleted ? updated.copyWith(completed: true) : updated;
+    state = [...state.where((q) => q.id != quest.id), quest];
     if (nowCompleted) {
-      final rewarded = updated.copyWith(completed: true);
-      state = [for (final q in state) q.id == quest.id ? rewarded : q];
       await ref.read(progressProvider.notifier).addBonusXp(quest.rewardXp);
-      await _repository.saveQuests(state);
-      return rewarded;
     }
     await _repository.saveQuests(state);
-    return null;
+    return nowCompleted ? quest : null;
+  }
+
+  /// Panggilan ringan untuk memastikan quest hari [day] sudah dibuat
+  /// (dipakai layar saat dibuka).
+  Future<void> ensureDailyQuest(DateTime day) async {
+    await refreshDailyQuest(day);
   }
 
   /// Membuka Mystery Chest hari [today]; null jika belum berhak.

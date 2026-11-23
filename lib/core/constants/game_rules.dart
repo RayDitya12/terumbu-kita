@@ -27,13 +27,15 @@ enum ActionType {
 }
 
 /// Tahap pertumbuhan terumbu, dihitung dari total aksi (spec.md §7.2).
+/// Ambang diturunkan untuk ritme "1 aksi/jenis/hari" (Unit A): ekosistem
+/// masih tercapai ±7 hari dan bisa didemokan dalam 2 minggu.
 ///
 /// CD4 + CD2: progress visual milik pengguna sendiri (Ownership).
 enum ReefStage {
   tunas(minActions: 0),
-  tumbuh(minActions: 10),
-  subur(minActions: 30),
-  ekosistem(minActions: 70);
+  tumbuh(minActions: 6),
+  subur(minActions: 18),
+  ekosistem(minActions: 40);
 
   const ReefStage({required this.minActions});
 
@@ -61,11 +63,20 @@ abstract final class GameRules {
   static const int minReefHealth = 0;
 
   // --- Batas harian (spec.md §7.2) ---
-  /// Maks. aksi per hari yang menghasilkan XP (mencegah abuse).
-  static const int dailyXpActionCap = 10;
+  /// Tiap jenis aksi hanya 1× per hari kalender (maks. 6 = jumlah
+  /// ActionType); inilah pencegah abuse, menggantikan batas "10 aksi/hari".
 
-  // --- Target mingguan (spec.md §7.2 "mis. 5 aksi", disetujui pengguna) ---
-  static const int weeklyActionTarget = 5;
+  /// Bonus "Hari Sempurna" saat keenam jenis tercatat dalam satu hari.
+  static const int perfectDayBonusXp = 10;
+
+  // --- Daily Quest rotasi 2 hari (spec.md §7.2) ---
+  static const int dailyQuestRewardXp = 15;
+  static const int dailyQuestCountTarget = 3;
+  static const int dailyQuestVarietyTarget = 2;
+  static const int varietyLookbackDays = 3;
+
+  // --- Target mingguan (spec.md §7.2, disetujui pengguna) ---
+  static const int weeklyActionTarget = 12;
 
   // --- Mystery Chest (spec.md §7.2) ---
   /// 1x/hari, hanya setelah Daily Quest selesai.

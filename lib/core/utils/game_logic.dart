@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
+import '../constants/app_strings.dart';
 import '../constants/game_rules.dart';
 import '../constants/impact_constants.dart';
+import '../../data/models/action_log.dart';
 import '../../data/models/progress.dart';
 import '../../data/models/quest.dart';
 import 'clock.dart';
@@ -50,6 +52,7 @@ class ActionOutcome {
     required this.leveledUp,
     required this.firstAction,
     required this.freezeUsed,
+    this.perfectDay = false,
     this.stageUp,
     this.streakMilestone,
   });
@@ -64,6 +67,9 @@ class ActionOutcome {
 
   /// Freeze dipakai untuk menyelamatkan streak dari 1 hari terlewat.
   final bool freezeUsed;
+
+  /// Win-State #5b: keenam jenis aksi tercatat hari ini (+10 XP).
+  final bool perfectDay;
 
   /// Tahap terumbu baru jika tahap naik karena aksi ini (Win-State #3).
   final ReefStage? stageUp;
@@ -100,17 +106,55 @@ XpOutcome applyXp(Progress progress, int amount) {
   );
 }
 
+/// Dua varian Daily Quest yang berotasi tiap hari (spec.md §7.2 Unit A).
+enum DailyQuestKind { count, variety }
+
+/// Rotasi deterministik: tanggal genap -> [DailyQuestKind.count],
+/// gasal -> [DailyQuestKind.variety].
+DailyQuestKind dailyQuestKind(DateTime day) => Clock.dateOnly(day).day.isEven
+    ? DailyQuestKind.count
+    : DailyQuestKind.variety;
+
 /// Daily Quest deterministik untuk hari [day] (spec.md §6.1 layar 5).
-/// CD2 + CD7: satu target kecil harian yang membuka Mystery Chest.
+/// CD2 + CD7: satu target kecil harian yang membuka Mystery Chest,
+/// berganti jenis agar tidak monoton.
 Quest dailyQuestFor(DateTime day) {
   final date = Clock.dateOnly(day);
+  final kind = dailyQuestKind(date);
   return Quest(
     id: 'daily-${date.year}-${date.month}-${date.day}',
-    title: 'Catat 3 aksi bebas plastik hari ini',
-    targetCount: 3,
+    title: kind == DailyQuestKind.count
+        ? AppStrings.questDailyThree
+        : AppStrings.questDailyVariety,
+    targetCount: kind == DailyQuestKind.count
+        ? GameRules.dailyQuestCountTarget
+        : GameRules.dailyQuestVarietyTarget,
     date: date,
-    rewardXp: 15,
+    rewardXp: GameRules.dailyQuestRewardXp,
   );
+}
+
+/// ID jenis aksi yang sudah dicatat pada hari [day] (spec.md §7.2 Unit A:
+/// 1 aksi per jenis per hari). Status dihitung dari log, bukan disimpan.
+Set<String> loggedTypeIdsOnDay(List<ActionLog> logs, DateTime day) => {
+  for (final log in logs)
+    if (Clock.dateOnly(log.timestamp) == Clock.dateOnly(day)) log.actionType,
+};
+
+/// Jumlah jenis aksi yang dicatat hari [today] dan belum pernah dicatat
+/// pada [GameRules.varietyLookbackDays] hari sebelumnya (progres quest
+/// "variasi" — spec.md §7.2 Unit A).
+int newTypeCountToday(List<ActionLog> logs, DateTime today) {
+  final todaySet = loggedTypeIdsOnDay(logs, today);
+  final lookbackStart = Clock.dateOnly(today)
+      .subtract(const Duration(days: GameRules.varietyLookbackDays));
+  final recentSet = {
+    for (final log in logs)
+      if (Clock.dateOnly(log.timestamp).isBefore(Clock.dateOnly(today)) &&
+          !Clock.dateOnly(log.timestamp).isBefore(lookbackStart))
+        log.actionType,
+  };
+  return todaySet.difference(recentSet).length;
 }
 
 /// Spesies yang sudah terbuka berdasarkan total aksi (spec.md §7.2
@@ -133,19 +177,20 @@ String userTitle({required int level, required Set<String> badges}) {
 }
 
 /// Hasil penerapan satu aksi ke [progress] pada hari [today], dengan
-/// [actionsToday] = jumlah aksi yang sudah dicatat hari ini.
+/// [typesCompletedToday] = jumlah jenis aksi berbeda yang tercatat hari
+/// ini termasuk [type] (pemanggil menjamin 1×/jenis/hari, spec.md §7.2).
 ///
-/// Semua aturan dari spec.md §7.2: batas XP harian, streak + freeze,
+/// Semua aturan dari spec.md §7.2: Hari Sempurna, streak + freeze,
 /// pemulihan kesehatan karang, dan level-up berantai.
 ActionOutcome applyAction({
   required Progress progress,
   required ActionType type,
   required DateTime today,
-  required int actionsToday,
+  required int typesCompletedToday,
 }) {
-  // CD3 (penghindaran abuse): aksi di luar batas harian tetap dicatat,
-  // tapi tidak menambah XP.
-  final xpGained = actionsToday < GameRules.dailyXpActionCap ? type.xp : 0;
+  // CD2 + CD7: Hari Sempurna — keenam jenis aksi tercatat dalam sehari.
+  final perfectDay = typesCompletedToday >= ActionType.values.length;
+  final xpGained = type.xp + (perfectDay ? GameRules.perfectDayBonusXp : 0);
 
   var xp = progress.xp + xpGained;
   var level = progress.level;
@@ -191,6 +236,7 @@ ActionOutcome applyAction({
   return ActionOutcome(
     progress: next,
     xpGained: xpGained,
+    perfectDay: perfectDay,
     grams: ImpactConstants.gramsFor(type.id),
     leveledUp: level > progress.level,
     firstAction: progress.totalActions == 0,
