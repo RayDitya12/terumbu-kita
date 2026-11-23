@@ -85,12 +85,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const DecoratedBox(
             decoration: BoxDecoration(gradient: reefBackgroundGradient),
           ),
-          // Area terumbu menempati separuh bawah layar.
+          // Area terumbu: dari bawah judul sampai tepat di atas kartu ringkasan.
           Positioned(
             left: 0,
             right: 0,
-            bottom: 150,
-            top: MediaQuery.sizeOf(context).height * 0.32,
+            bottom: 268,
+            top: MediaQuery.sizeOf(context).height * 0.16,
             child: CustomPaint(
               painter: ReefPainter(stage: stage, health: progress.reefHealth),
             ),
