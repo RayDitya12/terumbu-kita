@@ -24,6 +24,11 @@ abstract final class Formatters {
   /// "≈ 12 sedotan" (spec.md §3.4).
   static String strawEquivalent(int straws) => '≈ $straws sedotan';
 
+  /// "Tumbuh 3 aksi lagi untuk memperbesar terumbu." — CD2 dengan bahasa
+  /// ajakan (agent.md §3: pesan kehilangan/motivasi tidak menghukum).
+  static String nextReefStageHint(int actionsLeft) =>
+      'Tumbuh $actionsLeft aksi lagi untuk memperbesar terumbu.';
+
   /// Tanggal singkat, mis. "Sen, 23 Nov".
   static String shortDate(DateTime date) {
     const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
