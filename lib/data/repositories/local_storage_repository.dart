@@ -22,6 +22,7 @@ class LocalStorageRepository {
   static const _kQuests = 'terumbu.quests';
   static const _kCollection = 'terumbu.collection';
   static const _kSettings = 'terumbu.settings';
+  static const _kActionSnapshot = 'terumbu.lastActionSnapshot';
 
   final SharedPreferences _prefs;
 
@@ -66,6 +67,16 @@ class LocalStorageRepository {
   Future<void> saveSettings(AppSettings value) =>
       _encodeObject(_kSettings, value.toJson());
 
+  /// Snapshot sebelum aksi terakhir (logId + Progress + badge yang diberi-
+  /// kan) — dipakai tombol "Batalkan" hari yang sama (spec.md §7.2 Unit A).
+  Future<Map<String, dynamic>?> loadActionSnapshot() async =>
+      _readMap(_kActionSnapshot);
+
+  Future<void> saveActionSnapshot(Map<String, dynamic> value) =>
+      _encodeObject(_kActionSnapshot, value);
+
+  Future<void> clearActionSnapshot() => _prefs.remove(_kActionSnapshot);
+
   /// Reset total: dipakai Demo Mode (spec.md §8).
   Future<void> clearAll() async {
     for (final key in [
@@ -75,6 +86,7 @@ class LocalStorageRepository {
       _kQuests,
       _kCollection,
       _kSettings,
+      _kActionSnapshot,
     ]) {
       await _prefs.remove(key);
     }

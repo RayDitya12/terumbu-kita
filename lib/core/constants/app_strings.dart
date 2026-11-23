@@ -89,6 +89,15 @@ abstract final class AppStrings {
     'no_cutlery': 'Tolak Alat Makan Plastik',
   };
   static const logActionRecommended = 'Kebiasaan utamamu';
+  static const logActionDoneToday = 'Selesai hari ini';
+  static const logActionAlreadyLogged =
+      'Aksi ini sudah tercatat hari ini. Satu centang per hari sudah cukup!';
+  static const logActionAllDone =
+      'Semua aksi tercatat hari ini. Karangmu tumbuh — sampai jumpa besok!';
+  static const logActionCancel = 'Batalkan aksi terakhir hari ini';
+  static const logActionCancelDone = 'Aksi terakhir dibatalkan.';
+  static const logActionCancelGone =
+      'Aksi terakhir tidak lagi bisa dibatalkan.';
   static const logActionPhoto = 'Lampirkan foto bukti (simulasi)';
   static const logActionPhotoNote =
       'Foto hanya simulasi prototipe, tidak memakai kamera.';
@@ -102,9 +111,8 @@ abstract final class AppStrings {
       'Streak terselamatkan oleh streak freeze. Hebat, kamu konsisten!';
   static const winActionLevelUp = 'Naik level! Sekarang Level ';
   static const winActionBadgeNewDiver = 'Badge "Penyelam Baru" terbuka!';
-  static const winActionCapReached =
-      'Batas 10 aksi harian tercapai — XP dihitung lagi besok. '
-      'Aksi hari ini tetap dicatat dan karang tetap tumbuh.';
+  static const winActionPerfectDay =
+      'Hari Sempurna! Semua 6 jenis aksi tercatat — bonus +10 XP.';
   static const winActionCta = 'Lihat terumbuku';
 
   static const badgeNames = {
@@ -131,11 +139,15 @@ abstract final class AppStrings {
 
   // Quest harian & Mystery Chest (spec.md §6.1 layar 5).
   static const questTitle = 'Misi Harian';
+  static const questDailyLoading = 'Misi harian hari ini';
   static const questDailyReward = 'Hadiah selesai: +15 XP';
   static const questCompleted = 'Selesai! Hadiah XP sudah masuk.';
-  static const questProgressFormat = 'progress aksi hari ini';
+  static const questProgressFormat = 'progress hari ini';
+  static const questDailyThree = 'Catat 3 aksi bebas plastik hari ini';
+  static const questDailyVariety =
+      'Coba 2 jenis aksi yang belum kamu catat 3 hari terakhir';
   static const questWeeklyTitle = 'Target Mingguan';
-  static const questWeeklyBody = 'Kumpulkan 5 aksi minggu ini.';
+  static const questWeeklyBody = 'Kumpulkan 12 aksi minggu ini.';
   static const questWeeklyDone =
       'Target mingguan tercapai! Spesies baru menantimu di Koleksi.';
   static const chestOpen = 'Buka Mystery Chest';

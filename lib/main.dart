@@ -17,6 +17,10 @@ Future<void> main() async {
   final actionLogs = await repository.loadActionLogs();
   final collection = await repository.loadCollection();
   final quests = await repository.loadQuests();
+  final snapshotRaw = await repository.loadActionSnapshot();
+  final snapshot = snapshotRaw == null
+      ? null
+      : LastActionSnapshot.fromJson(snapshotRaw);
 
   // CD8: karang memudar saat aplikasi tidak dibuka; dihitung ulang di
   // startup memakai Clock (mendukung offset Demo Mode).
@@ -39,7 +43,7 @@ Future<void> main() async {
           () => ProfileNotifier(repository, profile),
         ),
         progressProvider.overrideWith(
-          () => ProgressNotifier(repository, decayedProgress),
+          () => ProgressNotifier(repository, decayedProgress, snapshot),
         ),
         actionLogsProvider.overrideWith(
           () => ActionLogsNotifier(repository, actionLogs),

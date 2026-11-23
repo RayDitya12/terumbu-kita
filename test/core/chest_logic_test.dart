@@ -22,13 +22,23 @@ void main() {
     });
   });
 
-  group('dailyQuestFor (spec.md §6.1 layar 5)', () {
+  group('dailyQuestFor rotasi (spec.md §7.2 Unit A)', () {
     test('id deterministik per tanggal kalender', () {
       final a = dailyQuestFor(DateTime(2026, 11, 23, 9));
       final b = dailyQuestFor(DateTime(2026, 11, 23, 21));
       expect(a.id, b.id);
-      expect(a.targetCount, 3);
       expect(a.rewardXp, 15);
+    });
+
+    test('tanggal gasal = variasi (target 2), genap = jumlah (target 3)', () {
+      final variety = dailyQuestFor(DateTime(2026, 11, 23));
+      final count = dailyQuestFor(DateTime(2026, 11, 24));
+      expect(dailyQuestKind(variety.date), DailyQuestKind.variety);
+      expect(variety.targetCount, 2);
+      expect(dailyQuestKind(count.date), DailyQuestKind.count);
+      expect(count.targetCount, 3);
+      expect(count.rewardXp, 15);
+      expect(variety.rewardXp, 15);
     });
   });
 

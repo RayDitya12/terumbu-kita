@@ -12,8 +12,8 @@ import '../../../core/utils/game_logic.dart';
 
 /// Catat Aksi (spec.md §6.1 layar 4).
 /// CD2: umpan balik instan; CD3: kebiasaan fokus pengguna direkomendasikan
-/// lebih dulu (lanjutan Glowing Choice); CD8: tanpa hukuman, batas harian
-/// disampaikan sebagai ajakan, bukan larangan.
+/// lebih dulu (lanjutan Glowing Choice); CD8: tanpa hukuman — tiap jenis
+/// cukup 1× per hari (spec.md §7.2 Unit A) dan sisanya jadi ajakan besok.
 class LogActionScreen extends ConsumerStatefulWidget {
   const LogActionScreen({super.key});
 
@@ -39,7 +39,12 @@ class _LogActionScreenState extends ConsumerState<LogActionScreen> {
   void initState() {
     super.initState();
     // CD3: kebiasaan yang dipilih di Glowing Choice tampil lebih dulu.
-    _selected = ref.read(profileProvider)?.focusHabit;
+    final focus = ref.read(profileProvider)?.focusHabit;
+    final done = loggedTypeIdsOnDay(
+      ref.read(actionLogsProvider),
+      ref.read(clockProvider).today,
+    );
+    _selected = (focus != null && !done.contains(focus.id)) ? focus : null;
   }
 
   Future<void> _submit() async {
@@ -49,6 +54,13 @@ class _LogActionScreenState extends ConsumerState<LogActionScreen> {
     final outcome = await ref.read(progressProvider.notifier).logAction(type);
     if (!mounted) return;
     setState(() => _saving = false);
+    if (outcome == null) {
+      // Jenis sudah tercatat hari ini (proteksi ganda, spec §7.2 Unit A).
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(AppStrings.logActionAlreadyLogged)),
+      );
+      return;
+    }
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -60,9 +72,29 @@ class _LogActionScreenState extends ConsumerState<LogActionScreen> {
     if (mounted) context.pop();
   }
 
+  Future<void> _cancelLast() async {
+    final done = await ref.read(progressProvider.notifier).cancelLastAction();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          done
+              ? AppStrings.logActionCancelDone
+              : AppStrings.logActionCancelGone,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final doneTypes = loggedTypeIdsOnDay(
+      ref.watch(actionLogsProvider),
+      ref.watch(clockProvider).today,
+    );
+    final allDone = doneTypes.length >= ActionType.values.length;
+    final canCancel = ref.read(progressProvider.notifier).canCancelLastAction;
     return Scaffold(
       appBar: AppBar(title: const Text(AppStrings.homeLogAction)),
       body: SafeArea(
@@ -99,6 +131,7 @@ class _LogActionScreenState extends ConsumerState<LogActionScreen> {
                         selected: _selected == type,
                         recommended:
                             ref.watch(profileProvider)?.focusHabit == type,
+                        done: doneTypes.contains(type.id),
                         onTap: () => setState(() => _selected = type),
                       ),
                   ],
@@ -119,6 +152,18 @@ class _LogActionScreenState extends ConsumerState<LogActionScreen> {
                       )
                     : null,
               ),
+              if (allDone)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    AppStrings.logActionAllDone,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.reefGradientBottom,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               FilledButton.icon(
                 icon: const Icon(Icons.check_circle_outline),
                 label: const Text(AppStrings.logActionSubmit),
@@ -127,8 +172,22 @@ class _LogActionScreenState extends ConsumerState<LogActionScreen> {
                   foregroundColor: Colors.black87,
                   minimumSize: const Size(0, 56),
                 ),
-                onPressed: _selected == null || _saving ? null : _submit,
+                onPressed:
+                    _selected == null ||
+                        _saving ||
+                        doneTypes.contains(_selected?.id)
+                    ? null
+                    : _submit,
               ),
+              if (canCancel) ...[
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  key: const Key('cancel-last-action'),
+                  icon: const Icon(Icons.undo),
+                  label: const Text(AppStrings.logActionCancel),
+                  onPressed: _saving ? null : _cancelLast,
+                ),
+              ],
             ],
           ),
         ),
@@ -143,6 +202,7 @@ class _ActionCard extends StatelessWidget {
     required this.icon,
     required this.selected,
     required this.recommended,
+    required this.done,
     required this.onTap,
   });
 
@@ -150,6 +210,10 @@ class _ActionCard extends StatelessWidget {
   final IconData icon;
   final bool selected;
   final bool recommended;
+
+  /// Jenis ini sudah dicatat hari ini — centang, tidak bisa ditap lagi
+  /// (spec.md §7.2 Unit A).
+  final bool done;
   final VoidCallback onTap;
 
   @override
@@ -157,7 +221,9 @@ class _ActionCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Card(
       elevation: selected ? 4 : 1,
-      color: selected
+      color: done
+          ? theme.colorScheme.secondaryContainer
+          : selected
           ? theme.colorScheme.surface
           : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
       shape: RoundedRectangleBorder(
@@ -169,13 +235,13 @@ class _ActionCard extends StatelessWidget {
       child: InkWell(
         key: Key('action-${type.id}'),
         borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
+        onTap: done ? null : onTap,
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (recommended)
+              if (recommended && !done)
                 const Padding(
                   padding: EdgeInsets.only(bottom: 4),
                   child: Text(
@@ -183,7 +249,14 @@ class _ActionCard extends StatelessWidget {
                     style: TextStyle(fontSize: 10, color: AppTheme.coralAccent),
                   ),
                 ),
-              Icon(icon, color: selected ? AppTheme.coralAccent : null),
+              Icon(
+                done ? Icons.check_circle : icon,
+                color: done
+                    ? AppTheme.reefGradientBottom
+                    : selected
+                    ? AppTheme.coralAccent
+                    : null,
+              ),
               const SizedBox(height: 6),
               Text(
                 AppStrings.actionLabels[type.id]!,
@@ -193,7 +266,13 @@ class _ActionCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text('+${type.xp} XP', style: theme.textTheme.labelSmall),
+              Text(
+                done ? AppStrings.logActionDoneToday : '+${type.xp} XP',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: done ? AppTheme.reefGradientBottom : null,
+                  fontWeight: done ? FontWeight.w700 : null,
+                ),
+              ),
             ],
           ),
         ),
@@ -283,7 +362,7 @@ class _WinStateSheet extends StatelessWidget {
   }
 
   List<String> _eventLines() => [
-    if (outcome.xpGained == 0) AppStrings.winActionCapReached,
+    if (outcome.perfectDay) AppStrings.winActionPerfectDay,
     if (outcome.freezeUsed) AppStrings.winActionFreezeNote,
     if (outcome.leveledUp)
       '${AppStrings.winActionLevelUp}${outcome.progress.level}',

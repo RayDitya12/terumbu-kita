@@ -165,7 +165,7 @@ class _DailyQuestCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              quest?.title ?? 'Misi harian hari ini',
+              quest?.title ?? AppStrings.questDailyLoading,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
               ),
