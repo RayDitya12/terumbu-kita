@@ -290,11 +290,12 @@ class ReefPainter extends CustomPainter {
         ..setFloat(1, size.height)
         ..setFloat(2, s.time)
         ..setFloat(3, 0.5 * _vitality);
-      _stroke
+      // Pakai _fill: drawRect dengan _stroke hanya menggambar garis tepi.
+      _fill
         ..shader = shader
         ..blendMode = BlendMode.screen;
-      canvas.drawRect(Offset.zero & size, _stroke);
-      _stroke
+      canvas.drawRect(Offset.zero & size, _fill);
+      _fill
         ..shader = null
         ..blendMode = BlendMode.srcOver;
     } else {
