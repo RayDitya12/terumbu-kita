@@ -23,17 +23,21 @@ class ProfileScreen extends ConsumerWidget {
     final badges = ref.watch(collectionProvider).badges.toSet();
     final title = userTitle(level: progress.level, badges: badges);
 
-    Future<void> advance(int days) => ref
-        .read(settingsProvider.notifier)
-        .update(
-          settings.copyWith(
-            // Offset tidak pernah negatif: mundir dibatasi sampai hari asli.
-            simulatedDateOffsetDays: math.max(
-              0,
-              settings.simulatedDateOffsetDays + days,
-            ),
-          ),
-        );
+    Future<void> advance(int days) async {
+      final next = settings.copyWith(
+        // Offset tidak pernah negatif: mundur dibatasi sampai hari asli.
+        simulatedDateOffsetDays: math.max(
+          0,
+          settings.simulatedDateOffsetDays + days,
+        ),
+      );
+      await ref.read(settingsProvider.notifier).update(next);
+      // CD8: geser tanggal Demo Mode menghitung ulang memudarnya karang,
+      // termasuk memulihkan warna saat mundur ke hari terakhir ada aksi.
+      await ref
+          .read(progressProvider.notifier)
+          .applyDecay(ref.read(clockProvider).today);
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text(AppStrings.profileScreenTitle)),
