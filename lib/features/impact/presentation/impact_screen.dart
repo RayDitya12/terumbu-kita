@@ -9,6 +9,6 @@ class ImpactScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const FeaturePlaceholder(
     title: AppStrings.navImpact,
-    stageNote: 'Grafik dampak mingguan dibangun di Tahap 4.',
+    stageNote: AppStrings.placeholderImpact,
   );
 }

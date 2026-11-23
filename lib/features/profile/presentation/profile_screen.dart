@@ -9,6 +9,6 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const FeaturePlaceholder(
     title: AppStrings.navProfile,
-    stageNote: 'Profil, Demo Mode, dan reset data dibangun di Tahap 5.',
+    stageNote: AppStrings.placeholderProfile,
   );
 }

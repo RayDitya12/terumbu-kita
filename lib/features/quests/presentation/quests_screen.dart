@@ -9,6 +9,6 @@ class QuestsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const FeaturePlaceholder(
     title: AppStrings.navQuest,
-    stageNote: 'Daily Quest & Mystery Chest dibangun di Tahap 4.',
+    stageNote: AppStrings.placeholderQuest,
   );
 }

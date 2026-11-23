@@ -9,6 +9,6 @@ class CommunityScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const FeaturePlaceholder(
     title: AppStrings.navCommunity,
-    stageNote: 'Leaderboard & tim (mock) dibangun di Tahap 5.',
+    stageNote: AppStrings.placeholderCommunity,
   );
 }

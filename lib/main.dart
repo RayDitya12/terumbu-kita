@@ -10,6 +10,8 @@ Future<void> main() async {
 
   final repository = await LocalStorageRepository.create();
   final settings = await repository.loadSettings();
+  final profile = await repository.loadProfile();
+  final progress = await repository.loadProgress();
 
   runApp(
     ProviderScope(
@@ -17,6 +19,12 @@ Future<void> main() async {
         storageRepositoryProvider.overrideWithValue(repository),
         settingsProvider.overrideWith(
           () => SettingsNotifier(repository, settings),
+        ),
+        profileProvider.overrideWith(
+          () => ProfileNotifier(repository, profile),
+        ),
+        progressProvider.overrideWith(
+          () => ProgressNotifier(repository, progress),
         ),
       ],
       child: const TerumbuApp(),
