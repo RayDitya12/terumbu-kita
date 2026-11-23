@@ -7,6 +7,7 @@ import 'core/constants/game_rules.dart';
 import 'core/providers.dart';
 import 'core/theme/app_theme.dart';
 import 'features/actions/presentation/log_action_screen.dart';
+import 'features/collection/presentation/collection_screen.dart';
 import 'features/community/presentation/community_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/impact/presentation/impact_screen.dart';
@@ -16,6 +17,7 @@ import 'features/onboarding/presentation/profile_setup_screen.dart';
 import 'features/onboarding/presentation/splash_screen.dart';
 import 'features/profile/presentation/profile_screen.dart';
 import 'features/quests/presentation/quests_screen.dart';
+import 'features/rewards/presentation/rewards_screen.dart';
 import 'shared/widgets/app_shell.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -57,6 +59,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       // Catat Aksi dibuka sebagai layar penuh di atas shell (spec.md §6.1).
       GoRoute(path: '/log-action', builder: (_, _) => const LogActionScreen()),
+      GoRoute(path: '/rewards', builder: (_, _) => const RewardsScreen()),
+      GoRoute(path: '/collection', builder: (_, _) => const CollectionScreen()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),

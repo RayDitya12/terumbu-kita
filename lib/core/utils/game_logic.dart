@@ -113,6 +113,25 @@ Quest dailyQuestFor(DateTime day) {
   );
 }
 
+/// Spesies yang sudah terbuka berdasarkan total aksi (spec.md §7.2
+/// Win-State #5). CD4: koleksi milik pengguna, terbuka bertahap.
+List<T> unlockedFrom<T extends SpeciesThreshold>(
+  List<T> all,
+  int totalActions,
+) => all.where((s) => totalActions >= s.minActions).toList(growable: false);
+
+/// Abstraksi kecil agar helper koleksi tidak bergantung tipe mock.
+abstract interface class SpeciesThreshold {
+  int get minActions;
+}
+
+/// Gelar pengguna (spec.md §3.5 status). CD2: gelar mengikuti prestasi.
+String userTitle({required int level, required Set<String> badges}) {
+  if (level >= 10) return 'Penjaga Karang';
+  if (badges.contains('penyelam_baru')) return 'Penyelam Baru';
+  return 'Calon Penyelam';
+}
+
 /// Hasil penerapan satu aksi ke [progress] pada hari [today], dengan
 /// [actionsToday] = jumlah aksi yang sudah dicatat hari ini.
 ///

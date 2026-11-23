@@ -34,6 +34,8 @@ class LocalStorageRepository {
   Future<void> saveProfile(UserProfile value) =>
       _encodeObject(_kProfile, value.toJson());
 
+  Future<void> removeProfile() => _prefs.remove(_kProfile);
+
   Future<Progress> loadProgress() async =>
       _decodeObject(_kProgress, Progress.fromJson) ?? const Progress();
 

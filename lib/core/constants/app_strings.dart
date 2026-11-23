@@ -159,4 +159,46 @@ abstract final class AppStrings {
   static const impactShare = 'Bagikan kartu dampak';
   static const impactShareMock =
       'Kartu dampak (simulasi prototipe) siap dibagikan.';
+
+  // Komunitas (spec.md §6.1 layar 9, mock §7.4).
+  static const communityTitle = 'Komunitas';
+  static const communityNationalLabel = 'Plastik dihindari bersama (mock)';
+  static const communityLeaderboard = 'Peringkat Teman Kampus';
+  static const communityTeams = 'Tim Karang';
+  static const communityChallenges = 'Tantangan Bersama';
+  static const communityChallengeBody =
+      'Kumpulkan 500 aksi se-kampus minggu ini untuk membuka spesies musiman.';
+  static const communityRewardsLink = 'Lihat Hadiah';
+
+  // Hadiah (spec.md §6.1 layar 10, mock).
+  static const rewardsTitle = 'Hadiah';
+  static const rewardsRedeem = 'Tukar';
+  static const rewardsQuotaLabel = 'kuota tersisa';
+  static const rewardsRedeemMock =
+      'Penukaran voucher hanya simulasi prototipe.';
+
+  // Koleksi (spec.md §6.1 layar 8).
+  static const collectionTitle = 'Koleksi';
+  static const collectionSpecies = 'Spesies Karang';
+  static const collectionDecorations = 'Dekorasi';
+  static const collectionBadges = 'Badge';
+  static const collectionLocked = 'Terkunci';
+  static const collectionSpeciesHint = 'Terbuka pada ';
+  static const collectionSpeciesHintSuffix = ' aksi';
+
+  // Profil & Pengaturan + Demo Mode (spec.md §6.1 layar 11, §8).
+  static const profileScreenTitle = 'Profil & Pengaturan';
+  static const profileTitleLabel = 'Gelar';
+  static const profileNotifications = 'Notifikasi pengingat (UI saja)';
+  static const profileCollectionLink = 'Buka Koleksi';
+  static const profileRewardsLink = 'Buka Hadiah';
+  static const demoModeTitle = 'Demo Mode';
+  static const demoModeSubtitle =
+      'Untuk presentasi: geser waktu dan isi data contoh.';
+  static const demoAdvance1 = 'Maju 1 hari';
+  static const demoAdvance7 = 'Maju 7 hari';
+  static const demoSampleData = 'Isi data contoh 2 minggu';
+  static const demoReset = 'Reset semua data';
+  static const demoOffsetLabel = 'Offset waktu saat ini: ';
+  static const demoOffsetDays = ' hari';
 }

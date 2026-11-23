@@ -8,6 +8,7 @@ import '../data/models/collection.dart';
 import '../data/models/progress.dart';
 import '../data/models/quest.dart';
 import '../data/models/user_profile.dart';
+import '../data/mock/mock_data.dart';
 import '../data/repositories/local_storage_repository.dart';
 import 'constants/game_rules.dart';
 import 'utils/chest.dart';
@@ -70,6 +71,11 @@ class ProfileNotifier extends Notifier<UserProfile?> {
   Future<void> save(UserProfile profile) async {
     state = profile;
     await _repository.saveProfile(profile);
+  }
+
+  Future<void> clear() async {
+    state = null;
+    await _repository.removeProfile();
   }
 }
 
@@ -159,6 +165,65 @@ class ProgressNotifier extends Notifier<Progress> {
     final total = math.min(GameRules.maxFreezes, state.freezes + amount);
     await save(state.copyWith(freezes: total));
   }
+
+  /// Demo Mode "isi data contoh" (spec.md §8): riwayat 2 minggu, 2 aksi/hari.
+  Future<void> loadSampleData() async {
+    final clock = ref.read(clockProvider);
+    final today = clock.today;
+    final logs = <ActionLog>[];
+    var progress = const Progress();
+    final types = [ActionType.tumbler, ActionType.noStraw];
+    for (var back = 13; back >= 0; back--) {
+      final day = today.subtract(Duration(days: back));
+      for (var i = 0; i < types.length; i++) {
+        final outcome = applyAction(
+          progress: progress,
+          type: types[i],
+          today: day,
+          actionsToday: i,
+        );
+        progress = outcome.progress;
+        logs.add(
+          ActionLog(
+            id: 'sample-${day.millisecondsSinceEpoch}-$i',
+            actionType: types[i].id,
+            timestamp: day.add(Duration(hours: 8 + i)),
+            xpGained: outcome.xpGained,
+            plasticGrams: outcome.grams,
+          ),
+        );
+      }
+    }
+    await ref.read(actionLogsProvider.notifier).replaceAll(logs);
+    await save(progress);
+    final profile = ref.read(profileProvider);
+    if (profile == null || !profile.onboardingDone) {
+      await ref
+          .read(profileProvider.notifier)
+          .save(
+            UserProfile(
+              nickname: 'Rani',
+              avatarId: 1,
+              focusHabit: ActionType.tumbler,
+              onboardingDone: true,
+              createdAt: today.subtract(const Duration(days: 14)),
+            ),
+          );
+    }
+    final badges = ref.read(collectionProvider.notifier);
+    await badges.addBadge('penyelam_baru');
+  }
+
+  /// Demo Mode "reset data" (spec.md §8): kosongkan penyimpanan & state.
+  Future<void> resetAll() async {
+    await _repository.clearAll();
+    await save(const Progress());
+    await ref.read(actionLogsProvider.notifier).replaceAll(const []);
+    await ref.read(questsProvider.notifier).replaceAll(const []);
+    await ref.read(collectionProvider.notifier).replaceAll();
+    await ref.read(profileProvider.notifier).clear();
+    await ref.read(settingsProvider.notifier).update(const AppSettings());
+  }
 }
 
 final progressProvider = NotifierProvider<ProgressNotifier, Progress>(
@@ -176,6 +241,11 @@ class ActionLogsNotifier extends Notifier<List<ActionLog>> {
 
   Future<void> add(ActionLog log) async {
     state = [...state, log];
+    await _repository.saveActionLogs(state);
+  }
+
+  Future<void> replaceAll(List<ActionLog> logs) async {
+    state = List.unmodifiable(logs);
     await _repository.saveActionLogs(state);
   }
 }
@@ -207,6 +277,11 @@ class CollectionNotifier extends Notifier<Collection> {
     );
     await _repository.saveCollection(state);
   }
+
+  Future<void> replaceAll() async {
+    state = const Collection();
+    await _repository.saveCollection(state);
+  }
 }
 
 final collectionProvider = NotifierProvider<CollectionNotifier, Collection>(
@@ -221,6 +296,11 @@ class QuestsNotifier extends Notifier<List<Quest>> {
 
   @override
   List<Quest> build() => _initial;
+
+  Future<void> replaceAll(List<Quest> quests) async {
+    state = List.unmodifiable(quests);
+    await _repository.saveQuests(state);
+  }
 
   Quest? _findDaily(DateTime day) {
     final date = Clock.dateOnly(day);
@@ -300,4 +380,26 @@ class QuestsNotifier extends Notifier<List<Quest>> {
 
 final questsProvider = NotifierProvider<QuestsNotifier, List<Quest>>(
   () => throw UnimplementedError('di-override di main()'),
+);
+
+/// Loader data mock (spec.md §7.4). Tes mengganti provider ini dengan
+/// reader fixture agar tidak menyentuh aset.
+final mockDataProvider = Provider<MockDataLoader>(
+  (ref) => const MockDataLoader(),
+);
+
+final communityProvider = FutureProvider<CommunityData>(
+  (ref) => ref.watch(mockDataProvider).loadCommunity(),
+);
+
+final rewardsProvider = FutureProvider<RewardData>(
+  (ref) => ref.watch(mockDataProvider).loadRewards(),
+);
+
+final speciesProvider = FutureProvider<List<CoralSpecies>>(
+  (ref) => ref.watch(mockDataProvider).loadSpecies(),
+);
+
+final factsProvider = FutureProvider<List<ImpactFact>>(
+  (ref) => ref.watch(mockDataProvider).loadFacts(),
 );

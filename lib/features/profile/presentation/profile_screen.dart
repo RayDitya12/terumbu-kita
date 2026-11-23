@@ -1,14 +1,153 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_strings.dart';
-import '../../../shared/widgets/feature_placeholder.dart';
+import '../../../core/providers.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/game_logic.dart';
 
-class ProfileScreen extends StatelessWidget {
+/// Profil & Pengaturan + Demo Mode (spec.md §6.1 layar 11, §8).
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => const FeaturePlaceholder(
-    title: AppStrings.navProfile,
-    stageNote: AppStrings.placeholderProfile,
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final profile = ref.watch(profileProvider);
+    final progress = ref.watch(progressProvider);
+    final settings = ref.watch(settingsProvider);
+    final badges = ref.watch(collectionProvider).badges.toSet();
+    final title = userTitle(level: progress.level, badges: badges);
+
+    Future<void> advance(int days) => ref
+        .read(settingsProvider.notifier)
+        .update(
+          settings.copyWith(
+            simulatedDateOffsetDays: settings.simulatedDateOffsetDays + days,
+          ),
+        );
+
+    return Scaffold(
+      appBar: AppBar(title: const Text(AppStrings.profileScreenTitle)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            child: ListTile(
+              leading: CircleAvatar(
+                radius: 28,
+                backgroundColor: AppTheme.reefGradientBottom,
+                child: Text(
+                  (profile?.nickname ?? '?').characters.first,
+                  style: const TextStyle(color: Colors.white, fontSize: 24),
+                ),
+              ),
+              title: Text(
+                profile?.nickname ?? '',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              subtitle: Text(
+                '${AppStrings.profileTitleLabel}: $title · '
+                '${AppStrings.homeLevel} ${progress.level}',
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            value: settings.notificationsEnabled,
+            onChanged: (v) => ref
+                .read(settingsProvider.notifier)
+                .update(settings.copyWith(notificationsEnabled: v)),
+            title: const Text(
+              AppStrings.profileNotifications,
+              style: TextStyle(fontSize: 14),
+            ),
+          ),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.collections),
+            label: const Text(AppStrings.profileCollectionLink),
+            onPressed: () => context.push('/collection'),
+          ),
+          const SizedBox(height: 6),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.card_giftcard),
+            label: const Text(AppStrings.profileRewardsLink),
+            onPressed: () => context.push('/rewards'),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            color: AppTheme.healthWarn.withValues(alpha: 0.08),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.science_outlined,
+                        color: AppTheme.healthWarn,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        AppStrings.demoModeTitle,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    AppStrings.demoModeSubtitle,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  Text(
+                    '${AppStrings.demoOffsetLabel}'
+                    '${settings.simulatedDateOffsetDays}'
+                    '${AppStrings.demoOffsetDays}',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      FilledButton.tonal(
+                        onPressed: () => advance(1),
+                        child: const Text(AppStrings.demoAdvance1),
+                      ),
+                      FilledButton.tonal(
+                        onPressed: () => advance(7),
+                        child: const Text(AppStrings.demoAdvance7),
+                      ),
+                      FilledButton.tonal(
+                        onPressed: () => ref
+                            .read(progressProvider.notifier)
+                            .loadSampleData(),
+                        child: const Text(AppStrings.demoSampleData),
+                      ),
+                      FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.healthWarn,
+                        ),
+                        onPressed: () async {
+                          await ref.read(progressProvider.notifier).resetAll();
+                          if (context.mounted) context.go('/splash');
+                        },
+                        child: const Text(AppStrings.demoReset),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

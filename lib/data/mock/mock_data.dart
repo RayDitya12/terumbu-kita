@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../../core/utils/game_logic.dart';
+
 /// Model ringan untuk data mock (spec.md §7.4) dan loader JSON aset.
 ///
 /// Data ini hanya untuk demo: komunitas, voucher, dan spesies tidak nyata
@@ -127,7 +129,7 @@ class ImpactFact {
   final String source;
 }
 
-class CoralSpecies {
+class CoralSpecies implements SpeciesThreshold {
   const CoralSpecies({
     required this.id,
     required this.name,

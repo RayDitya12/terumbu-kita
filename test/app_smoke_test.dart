@@ -28,9 +28,9 @@ void main() {
     expect(find.text(AppStrings.homeLogAction), findsOneWidget);
     expect(find.text(AppStrings.reefStageNames['tunas']!), findsOneWidget);
 
-    // Pindah tab ke Profil menampilkan placeholder Tahap 5.
+    // Pindah tab ke Profil menampilkan layar Demo Mode (Tahap 5).
     await tester.tap(find.text(AppStrings.navProfile));
     await tester.pumpAndSettle();
-    expect(find.text(AppStrings.placeholderProfile), findsOneWidget);
+    expect(find.text(AppStrings.demoModeTitle), findsOneWidget);
   });
 }

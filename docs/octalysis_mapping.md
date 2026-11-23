@@ -11,8 +11,8 @@ Status kolom: `belum` = belum ada kode, `sebagian` = ada tapi belum lengkap, `ja
 | CD2 | Development & Accomplishment | XP, level, badge, target mingguan, progress terumbu | Log Aksi, Home | jadi | `core/utils/game_logic.dart`, `features/actions`, `features/home` (XP/streak/dampak hidup) |
 | CD3 | Empowerment of Creativity & Feedback | Glowing Choice, pilih tantangan, dekorasi | Onboarding, Koleksi | sebagian | `features/onboarding/presentation/glowing_choice_screen.dart`; dekorasi belum |
 | CD4 | Ownership & Possession | Terumbu pribadi, koleksi spesies/dekorasi | Home, Koleksi | sebagian | `shared/widgets/reef_painter.dart` (terumbu tumbuh per tahap, naik via aksi); dekorasi belum |
-| CD5 | Social Influence & Relatedness | Leaderboard mock, tim, share kartu | Komunitas, Dampak | sebagian | `splash_screen.dart` (sinyal "teman bergabung" mock); leaderboard belum |
-| CD6 | Scarcity & Impatience | Spesies musiman, voucher kuota terbatas | Event, Hadiah | belum | Tahap 5/6 |
+| CD5 | Social Influence & Relatedness | Leaderboard mock, tim, share kartu | Komunitas, Dampak | jadi | `features/community` (leaderboard/tim/challenge mock), share mock di `features/impact` |
+| CD6 | Scarcity & Impatience | Spesies musiman, voucher kuota terbatas | Event, Hadiah | sebagian | `features/rewards` (kuota + label simulasi); event musiman Tahap 6 |
 | CD7 | Unpredictability & Curiosity | Mystery Chest, fakta acak, mini-game | Quest, Home | sebagian | `core/utils/chest.dart` (undian berbobot 1x/hari); mini-game Tahap 6 |
 | CD8 | Loss & Avoidance | Karang memudar (−25/hari mulai hari ke-4, pulih dgn 1 aksi), streak + freeze | Home | jadi | `core/utils/game_logic.dart` (`reefHealthOn` + pemulihan via aksi), `reef_painter.dart` (warna memudar) |
 
@@ -27,6 +27,12 @@ Status kolom: `belum` = belum ada kode, `sebagian` = ada tapi belum lengkap, `ja
 - Layar **Misi**: Daily Quest "3 aksi hari ini" dengan bar progres, hadiah +15 XP otomatis saat selesai (Win-State #4), target mingguan 5 aksi, dan **Mystery Chest** 1x/hari (undian XP/freeze/dekorasi/fakta, dialog hadiah).
 - Layar **Dampak**: total gram + padanan sedotan, grafik bar 7 hari (fl_chart), tombol share kartu dampak (simulasi toast).
 - Streak freeze dari chest langsung dipakai logika aksi (gap 1 hari terselamatkan).
+
+## Fitur Tahap 5 yang terlihat saat demo (2026-11-23)
+- **Komunitas** (mock): counter kolektif nasional, leaderboard teman, tim + kontribusi, tantangan; tombol ke Hadiah.
+- **Hadiah** (mock): voucher dengan bar kuota terbatas + disclaimer simulasi, tombol tukar → toast simulasi.
+- **Koleksi**: spesies terbuka otomatis berdasar total aksi (kunci + syarat terlihat), dekorasi dari chest, badge dengan nama.
+- **Profil & Demo Mode**: gelar (Calon Penyelam → Penyelam Baru → Penjaga Karang), switch notifikasi (UI), maju 1/7 hari, isi data contoh 2 minggu (28 aksi), reset total → kembali ke splash.
 
 ## Fitur Tahap 2 yang terlihat saat demo (2026-11-23)
 - Alur onboarding penuh: Splash bernarasi → 3 slide intro → **Glowing Choice** (4 kartu besar, "Bawa Tumbler" disarankan & terpilih otomatis) → nama + avatar → Home.
