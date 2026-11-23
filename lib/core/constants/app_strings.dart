@@ -201,4 +201,30 @@ abstract final class AppStrings {
   static const demoReset = 'Reset semua data';
   static const demoOffsetLabel = 'Offset waktu saat ini: ';
   static const demoOffsetDays = ' hari';
+
+  // Mini-game "Pilah Cepat" (spec.md §6.1 layar 6).
+  static const miniGameTitle = 'Pilah Cepat';
+  static const miniGamePrompt =
+      'Termasuk sekali pakai atau bisa dipakai ulang?';
+  static const miniGameOnce = 'Sekali Pakai';
+  static const miniGameReuse = 'Bisa Dipakai Ulang';
+  static const miniGameScore = 'Skor: ';
+  static String miniGameScoreText(int score) => '$miniGameScore$score/10';
+  static String miniGameRewardNote(int xp) =>
+      'Benar semua? $xp XP menanti. Mini-game ini simulasi ringan '
+      'berbasis pengetahuan, bukan aksi nyata.';
+  static const miniGameClaim = 'Ambil XP';
+
+  // Event musiman (spec.md §6.1, CD6).
+  static const eventTitle = 'Event Musiman';
+  static const eventBody =
+      'Spesies musiman "Karang Bulan" terbuka untuk aksi di akhir pekan '
+      'ini. (Simulasi prototipe)';
+  static const eventCta = 'Main Pilah Cepat untuk info';
+
+  // Tentang Desain Octalysis (spec.md §6.1 layar 12, opsional).
+  static const octalysisTitle = 'Tentang Desain Octalysis';
+  static const octalysisIntro =
+      'Delapan motivasi dasar (Core Drives) yang dipakai aplikasi ini, '
+      'skala 0-10 sesuai target radar spec.md §4.2.';
 }

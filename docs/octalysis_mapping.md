@@ -13,7 +13,7 @@ Status kolom: `belum` = belum ada kode, `sebagian` = ada tapi belum lengkap, `ja
 | CD4 | Ownership & Possession | Terumbu pribadi, koleksi spesies/dekorasi | Home, Koleksi | sebagian | `shared/widgets/reef_painter.dart` (terumbu tumbuh per tahap, naik via aksi); dekorasi belum |
 | CD5 | Social Influence & Relatedness | Leaderboard mock, tim, share kartu | Komunitas, Dampak | jadi | `features/community` (leaderboard/tim/challenge mock), share mock di `features/impact` |
 | CD6 | Scarcity & Impatience | Spesies musiman, voucher kuota terbatas | Event, Hadiah | sebagian | `features/rewards` (kuota + label simulasi); event musiman Tahap 6 |
-| CD7 | Unpredictability & Curiosity | Mystery Chest, fakta acak, mini-game | Quest, Home | sebagian | `core/utils/chest.dart` (undian berbobot 1x/hari); mini-game Tahap 6 |
+| CD7 | Unpredictability & Curiosity | Mystery Chest, fakta acak, mini-game | Quest, Home | jadi | `core/utils/chest.dart`, `features/minigame` (Pilah Cepat 30 detik) |
 | CD8 | Loss & Avoidance | Karang memudar (−25/hari mulai hari ke-4, pulih dgn 1 aksi), streak + freeze | Home | jadi | `core/utils/game_logic.dart` (`reefHealthOn` + pemulihan via aksi), `reef_painter.dart` (warna memudar) |
 
 ## Fitur Tahap 3 yang terlihat saat demo (2026-11-23)
@@ -33,6 +33,12 @@ Status kolom: `belum` = belum ada kode, `sebagian` = ada tapi belum lengkap, `ja
 - **Hadiah** (mock): voucher dengan bar kuota terbatas + disclaimer simulasi, tombol tukar → toast simulasi.
 - **Koleksi**: spesies terbuka otomatis berdasar total aksi (kunci + syarat terlihat), dekorasi dari chest, badge dengan nama.
 - **Profil & Demo Mode**: gelar (Calon Penyelam → Penyelam Baru → Penjaga Karang), switch notifikasi (UI), maju 1/7 hari, isi data contoh 2 minggu (28 aksi), reset total → kembali ke splash.
+
+## Fitur Tahap 6 yang terlihat saat demo (2026-11-23)
+- Mini-game **Pilah Cepat** 30 detik: 10 item diacak (seed deterministik), dua tombol kategori, skor → XP bonus via addBonusXp; diakses dari banner event di Misi dan dari Profil.
+- Banner **Event Musiman** (spesies musiman simulasi, CD6) di layar Misi.
+- Layar **Tentang Desain Octalysis**: radar chart 8 Core Drives (target §4.2) + kartu keseimbangan White/Black Hat — siap untuk pitch.
+- Alur demo lengkap §6.2 teruji lewat tes widget (73 tes).
 
 ## Fitur Tahap 2 yang terlihat saat demo (2026-11-23)
 - Alur onboarding penuh: Splash bernarasi → 3 slide intro → **Glowing Choice** (4 kartu besar, "Bawa Tumbler" disarankan & terpilih otomatis) → nama + avatar → Home.

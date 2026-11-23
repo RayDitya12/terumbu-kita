@@ -78,6 +78,18 @@ class ProfileScreen extends ConsumerWidget {
             label: const Text(AppStrings.profileRewardsLink),
             onPressed: () => context.push('/rewards'),
           ),
+          const SizedBox(height: 6),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.sports_esports),
+            label: const Text(AppStrings.miniGameTitle),
+            onPressed: () => context.push('/minigame'),
+          ),
+          const SizedBox(height: 6),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.insights),
+            label: const Text(AppStrings.octalysisTitle),
+            onPressed: () => context.push('/octalysis'),
+          ),
           const SizedBox(height: 16),
           Card(
             color: AppTheme.healthWarn.withValues(alpha: 0.08),

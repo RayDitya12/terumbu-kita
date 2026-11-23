@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/game_rules.dart';
@@ -128,6 +129,18 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
                     ),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // CD6: event musiman (banner simulasi) + pintu mini-game (CD7).
+          Card(
+            color: AppTheme.coralAccent.withValues(alpha: 0.10),
+            child: ListTile(
+              leading: const Icon(Icons.local_activity),
+              title: const Text(AppStrings.eventTitle),
+              subtitle: const Text(AppStrings.eventBody),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/minigame'),
             ),
           ),
         ],

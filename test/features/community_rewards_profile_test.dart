@@ -98,6 +98,12 @@ void main() {
 
     await tester.tap(find.text(AppStrings.navProfile));
     await tester.pumpAndSettle();
+    await tester.dragUntilVisible(
+      find.text(AppStrings.demoAdvance7),
+      find.byType(ListView),
+      const Offset(0, -100),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text(AppStrings.demoAdvance7));
     await tester.pumpAndSettle();
 
@@ -134,6 +140,12 @@ void main() {
     final repository = await pumpTerumbuApp(tester, profile: profile);
 
     await tester.tap(find.text(AppStrings.navProfile));
+    await tester.pumpAndSettle();
+    await tester.dragUntilVisible(
+      find.text(AppStrings.demoSampleData),
+      find.byType(ListView),
+      const Offset(0, -100),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text(AppStrings.demoSampleData));
     await tester.pumpAndSettle();

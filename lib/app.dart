@@ -11,6 +11,8 @@ import 'features/collection/presentation/collection_screen.dart';
 import 'features/community/presentation/community_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/impact/presentation/impact_screen.dart';
+import 'features/minigame/presentation/mini_game_screen.dart';
+import 'features/octalysis/presentation/octalysis_screen.dart';
 import 'features/onboarding/presentation/glowing_choice_screen.dart';
 import 'features/onboarding/presentation/intro_slides_screen.dart';
 import 'features/onboarding/presentation/profile_setup_screen.dart';
@@ -61,6 +63,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/log-action', builder: (_, _) => const LogActionScreen()),
       GoRoute(path: '/rewards', builder: (_, _) => const RewardsScreen()),
       GoRoute(path: '/collection', builder: (_, _) => const CollectionScreen()),
+      GoRoute(path: '/minigame', builder: (_, _) => const MiniGameScreen()),
+      GoRoute(path: '/octalysis', builder: (_, _) => const OctalysisScreen()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
