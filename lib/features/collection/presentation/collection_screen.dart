@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
@@ -18,7 +20,7 @@ class CollectionScreen extends ConsumerWidget {
     final collection = ref.watch(collectionProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.collectionTitle)),
+      appBar: SeaAppBar(title: AppStrings.collectionTitle),
       body: species.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(child: Text(AppStrings.impactNoData)),

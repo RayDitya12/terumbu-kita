@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/game_rules.dart';
 import '../../../core/providers.dart';
@@ -79,7 +81,7 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
         (chestToday == null || Clock.dateOnly(chestToday) != today);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.questTitle)),
+      appBar: SeaAppBar(title: AppStrings.questTitle),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

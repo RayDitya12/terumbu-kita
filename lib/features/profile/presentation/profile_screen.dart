@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
@@ -40,7 +42,7 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.profileScreenTitle)),
+      appBar: SeaAppBar(title: AppStrings.profileScreenTitle),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

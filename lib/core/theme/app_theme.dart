@@ -111,3 +111,10 @@ const LinearGradient reefBackgroundGradient = LinearGradient(
   end: Alignment.bottomCenter,
   colors: [AppColors.reefSceneTop, AppColors.reefSceneBottom],
 );
+
+/// Gradien pita header layar sekunder (deep ocean → teal).
+const LinearGradient seaHeaderGradient = LinearGradient(
+  begin: Alignment.centerLeft,
+  end: Alignment.centerRight,
+  colors: [AppColors.deepOcean, AppColors.teal],
+);

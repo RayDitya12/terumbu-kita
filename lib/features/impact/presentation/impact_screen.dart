@@ -2,6 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/impact_constants.dart';
 import '../../../core/providers.dart';
@@ -31,7 +33,7 @@ class ImpactScreen extends ConsumerWidget {
     final maxGrams = dailyGrams.fold<double>(0, (m, g) => g > m ? g : m);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.impactTitle)),
+      appBar: SeaAppBar(title: AppStrings.impactTitle),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

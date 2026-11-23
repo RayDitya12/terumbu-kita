@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
@@ -18,7 +20,7 @@ class CommunityScreen extends ConsumerWidget {
     final community = ref.watch(communityProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.communityTitle)),
+      appBar: SeaAppBar(title: AppStrings.communityTitle),
       body: community.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(child: Text(AppStrings.impactNoData)),

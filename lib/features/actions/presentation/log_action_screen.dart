@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/game_rules.dart';
 import '../../../core/constants/impact_constants.dart';
@@ -96,7 +98,7 @@ class _LogActionScreenState extends ConsumerState<LogActionScreen> {
     final allDone = doneTypes.length >= ActionType.values.length;
     final canCancel = ref.read(progressProvider.notifier).canCancelLastAction;
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.homeLogAction)),
+      appBar: SeaAppBar(title: AppStrings.homeLogAction),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),

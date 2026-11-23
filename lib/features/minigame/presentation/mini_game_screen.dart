@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
@@ -94,8 +96,8 @@ class _MiniGameScreenState extends ConsumerState<MiniGameScreen> {
     final theme = Theme.of(context);
     final done = _finished;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.miniGameTitle),
+      appBar: SeaAppBar(
+        title: AppStrings.miniGameTitle,
         actions: [
           Center(
             child: Padding(

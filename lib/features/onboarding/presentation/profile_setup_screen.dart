@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -55,60 +56,64 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                AppStrings.profileTitle,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // Satu-satunya layar berlatar terang tanpa pita header.
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  AppStrings.profileTitle,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                key: const Key('nickname-field'),
-                controller: _nicknameController,
-                maxLength: 20,
-                textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(
-                  labelText: AppStrings.profileNicknameLabel,
-                  hintText: AppStrings.profileNicknameHint,
-                  border: const OutlineInputBorder(),
-                  counterText: '',
+                const SizedBox(height: 24),
+                TextField(
+                  key: const Key('nickname-field'),
+                  controller: _nicknameController,
+                  maxLength: 20,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(
+                    labelText: AppStrings.profileNicknameLabel,
+                    hintText: AppStrings.profileNicknameHint,
+                    border: const OutlineInputBorder(),
+                    counterText: '',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                AppStrings.profileAvatarLabel,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
+                const SizedBox(height: 24),
+                Text(
+                  AppStrings.profileAvatarLabel,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  for (var i = 0; i < _avatars.length; i++)
-                    KeyedSubtree(
-                      key: ValueKey('avatar-$i'),
-                      child: _AvatarOption(
-                        icon: _avatars[i],
-                        selected: i == _avatarIndex,
-                        onTap: () => setState(() => _avatarIndex = i),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    for (var i = 0; i < _avatars.length; i++)
+                      KeyedSubtree(
+                        key: ValueKey('avatar-$i'),
+                        child: _AvatarOption(
+                          icon: _avatars[i],
+                          selected: i == _avatarIndex,
+                          onTap: () => setState(() => _avatarIndex = i),
+                        ),
                       ),
-                    ),
-                ],
-              ),
-              const Spacer(),
-              FilledButton(
-                onPressed: _saving ? null : _finish,
-                child: const Text(AppStrings.profileDone),
-              ),
-            ],
+                  ],
+                ),
+                const Spacer(),
+                FilledButton(
+                  onPressed: _saving ? null : _finish,
+                  child: const Text(AppStrings.profileDone),
+                ),
+              ],
+            ),
           ),
         ),
       ),
