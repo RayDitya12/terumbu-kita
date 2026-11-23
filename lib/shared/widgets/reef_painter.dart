@@ -219,6 +219,7 @@ class ReefPainter extends CustomPainter {
     ..style = PaintingStyle.stroke;
   final Paint _fill = Paint()..style = PaintingStyle.fill;
   final Path _path = Path();
+  final Path _mask = Path();
   ui.FragmentShader? _shader;
   List<Color>? _bleachedPalette;
   List<Color>? _detailPalette;
@@ -228,10 +229,12 @@ class ReefPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final s = state;
     final groundY = size.height - _sandTop;
-    if (s.showCaustics) _drawCaustics(canvas, size, s);
     if (s.showRays) _drawLightRays(canvas, size, s);
     _drawSeabed(canvas, size, s);
     _drawCorals(canvas, size, groundY, s);
+    // Caustics setelah karang: cahaya bermain DI ATAS terumbu dan pasir,
+    // bukan melayang di air terbuka (mask _reefMask).
+    if (s.showCaustics) _drawCaustics(canvas, size, groundY, s);
     _drawBubbles(canvas, size, groundY, s);
     _drawBurst(canvas, size, groundY, s);
     _drawFlash(canvas, size, s);
@@ -269,7 +272,16 @@ class ReefPainter extends CustomPainter {
 
   // ---------------------------------------------------------------- cahaya
 
-  void _drawCaustics(Canvas canvas, Size size, ReefVisualState s) {
+  /// Caustics di-mask ke siluet terumbu + pasir (permintaan QA: cahaya
+  /// bermain di atas karang dan dasar, bukan di air terbuka).
+  void _drawCaustics(
+    Canvas canvas,
+    Size size,
+    double groundY,
+    ReefVisualState s,
+  ) {
+    canvas.save();
+    canvas.clipPath(_reefMask(size, groundY, s));
     final program = s.causticsProgram;
     if (program != null) {
       final shader = _shader ??= program.fragmentShader();
@@ -277,7 +289,7 @@ class ReefPainter extends CustomPainter {
         ..setFloat(0, size.width)
         ..setFloat(1, size.height)
         ..setFloat(2, s.time)
-        ..setFloat(3, 0.35 * _vitality);
+        ..setFloat(3, 0.5 * _vitality);
       _stroke
         ..shader = shader
         ..blendMode = BlendMode.screen;
@@ -285,19 +297,65 @@ class ReefPainter extends CustomPainter {
       _stroke
         ..shader = null
         ..blendMode = BlendMode.srcOver;
-      return;
+    } else {
+      _drawCausticsFallback(canvas, size, s);
     }
-    _drawCausticsFallback(canvas, size, s);
+    canvas.restore();
   }
 
-  /// Fallback dua lapis pita cahaya bergeser berlawanan (item 3 Unit B).
+  /// Siluet area terumbu: pasir bergelombang + batu + elips tiap karang.
+  Path _reefMask(Size size, double groundY, ReefVisualState s) {
+    _mask.reset();
+    _mask.moveTo(0, groundY + 4);
+    for (var x = 0.0; x <= size.width; x += 48) {
+      _mask.quadraticBezierTo(
+        x + 24,
+        groundY + math.sin(x * 0.02 + 1.3) * 5,
+        x + 48,
+        groundY + 4,
+      );
+    }
+    _mask
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    for (final rock in s.layout.rocks) {
+      _mask.addOval(
+        Rect.fromCenter(
+          center: Offset(rock.x * size.width, groundY + 6),
+          width: rock.width,
+          height: rock.height,
+        ),
+      );
+    }
+    final areaHeight = size.height * 0.58;
+    final scale = 0.82 + 0.18 * s.growth;
+    final corals = s.layout.corals;
+    for (var i = 0; i < corals.length; i++) {
+      final spec = corals[i];
+      final popScale = i == corals.length - 1 ? _easeOut(s.pop) : 1.0;
+      final height = areaHeight * spec.height * scale * popScale;
+      final baseX = size.width * 0.05 + spec.x * size.width * 0.9;
+      _mask.addOval(
+        Rect.fromCenter(
+          center: Offset(baseX, groundY + 6 - height * 0.5),
+          width: height * 0.6 + 26,
+          height: height + 26,
+        ),
+      );
+    }
+    return _mask;
+  }
+
+  /// Fallback dua lapis pita cahaya bergeser berlawanan (item 3 Unit B),
+  /// kini di zona terumbu karena ikut ter-mask.
   void _drawCausticsFallback(Canvas canvas, Size size, ReefVisualState s) {
     final alpha = 0.06 * _vitality;
     for (var layer = 0; layer < 2; layer++) {
       final dir = layer == 0 ? 1.0 : -1.0;
       final drift = s.time * 0.35 * dir + layer * 2.1;
       for (var band = 0; band < 4; band++) {
-        final baseY = size.height * (0.08 + 0.16 * band) + layer * 14;
+        final baseY = size.height * (0.42 + 0.14 * band) + layer * 10;
         _path
           ..reset()
           ..moveTo(0, baseY);
@@ -330,7 +388,9 @@ class ReefPainter extends CustomPainter {
         ..lineTo(bottom + 34, size.height * 0.82)
         ..lineTo(bottom - 34, size.height * 0.82)
         ..close();
-      _fill.color = Colors.white.withValues(alpha: 0.05 * _vitality);
+      _fill.color = Colors.white.withValues(
+        alpha: (0.05 + 0.025 * math.sin(s.time * 0.17 + i * 1.9)) * _vitality,
+      );
       canvas.drawPath(_path, _fill);
     }
   }
