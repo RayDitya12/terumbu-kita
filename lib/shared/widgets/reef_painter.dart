@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../core/constants/game_rules.dart';
+import '../../core/constants/visual_config.dart';
 
 /// Unit B: spesies karang prosedural (tanpa aset eksternal — agent.md §8).
 /// Spesies baru terbuka seiring naiknya tahap terumbu.
@@ -134,7 +135,9 @@ class ReefLayout {
         radius: 2 + rng.nextDouble() * 6,
         speed: 0.03 + rng.nextDouble() * 0.06,
         phase: rng.nextDouble(),
-        depth: rng.nextDouble(),
+        depth:
+            ((i % VisualConfig.bubbleParallaxLayers) + rng.nextDouble()) /
+            VisualConfig.bubbleParallaxLayers,
       );
     });
   }
@@ -172,6 +175,12 @@ class ReefVisualState extends ChangeNotifier {
   double flash = 1;
 
   ui.FragmentProgram? causticsProgram;
+
+  /// Pita/caustics shader; mati pada mode Minimal.
+  bool showCaustics = true;
+
+  /// Berkas cahaya; hanya hidup pada mode Penuh.
+  bool showRays = true;
 
   void mutate(void Function() update) {
     update();
@@ -219,8 +228,8 @@ class ReefPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final s = state;
     final groundY = size.height - _sandTop;
-    _drawCaustics(canvas, size, s);
-    _drawLightRays(canvas, size, s);
+    if (s.showCaustics) _drawCaustics(canvas, size, s);
+    if (s.showRays) _drawLightRays(canvas, size, s);
     _drawSeabed(canvas, size, s);
     _drawCorals(canvas, size, groundY, s);
     _drawBubbles(canvas, size, groundY, s);
