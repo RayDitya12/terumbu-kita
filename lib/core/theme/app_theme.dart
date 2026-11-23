@@ -4,7 +4,18 @@ import 'app_colors.dart';
 
 /// Tema Material 3 terpusat bernuansa laut (spec.md §9).
 /// Semua warna bersumber dari [AppColors]; widget tidak boleh hardcode.
+
+/// Varian tema (unit tema): A = latar pucat + header gradien (default),
+/// B = gelap penuh. Tukar lewat satu konstanta [kTerumbuThemeVariant].
+enum TerumbuThemeVariant { a, b }
+
+const TerumbuThemeVariant kTerumbuThemeVariant = TerumbuThemeVariant.a;
+
 abstract final class AppTheme {
+  /// Tema aktif untuk varian terpilih; dipakai app.dart.
+  static ThemeData forVariant(TerumbuThemeVariant variant) =>
+      variant == TerumbuThemeVariant.b ? dark() : light();
+
   static ThemeData light() => _base(Brightness.light);
   static ThemeData dark() => _base(Brightness.dark);
 
