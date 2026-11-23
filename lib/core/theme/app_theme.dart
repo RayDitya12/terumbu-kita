@@ -12,6 +12,15 @@ abstract final class AppTheme {
   static const Color coralAccent = Color(0xFFFF8A65);
   static const Color healthWarn = Color(0xFFFFC96B);
 
+  /// Tint jenuh untuk kartu informatif (Event Musiman, kolektif, Demo Mode)
+  /// agar tidak tampak abu-abu "disabled" seperti warna alpha rendah.
+  static const Color seaTint = Color(0xFFD9EEF5);
+  static const Color coralTint = Color(0xFFFFE3D6);
+  static const Color amberTint = Color(0xFFFFF0D1);
+
+  /// Warna "tinta" di atas tint respective agar kontras cukup di latar terang.
+  static const Color amberInk = Color(0xFF8A5A00);
+
   static ThemeData light() => _base(Brightness.light);
   static ThemeData dark() => _base(Brightness.dark);
 

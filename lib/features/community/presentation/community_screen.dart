@@ -26,7 +26,7 @@ class CommunityScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: [
             Card(
-              color: AppTheme.reefGradientBottom.withValues(alpha: 0.12),
+              color: AppTheme.seaTint,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
