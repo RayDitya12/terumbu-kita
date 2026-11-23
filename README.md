@@ -11,12 +11,12 @@ dan aturan dirancang di [spec.md](spec.md); proses kerjanya di [agent.md](agent.
 ## Galeri
 
 | Rumah (terumbu hidup) | Catat Aksi | Dampak Nyata |
-|---|---|---|
-| ![Rumah](docs/screenshots/rumah_penuh.png) | ![Catat Aksi](docs/screenshots/catat_aksi.png) | ![Dampak](docs/screenshots/dampak.png) |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/rumah_penuh.png" width="230" alt="Rumah"> | <img src="docs/screenshots/catat_aksi.png" width="230" alt="Catat Aksi"> | <img src="docs/screenshots/dampak.png" width="230" alt="Dampak"> |
 
 | Misi | Komunitas | Profil & Pengaturan |
-|---|---|---|
-| ![Misi](docs/screenshots/misi.png) | ![Komunitas](docs/screenshots/komunitas.png) | ![Profil](docs/screenshots/profil.png) |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/misi.png" width="230" alt="Misi"> | <img src="docs/screenshots/komunitas.png" width="230" alt="Komunitas"> | <img src="docs/screenshots/profil.png" width="230" alt="Profil"> |
 
 ## Fitur utama
 
@@ -60,8 +60,8 @@ Jika perangkat mematikan animasi sistem (`disableAnimations`), aplikasi memaksa
 mode Minimal dan menampilkannya sebagai catatan kecil.
 
 | Penuh | Hemat | Minimal |
-|---|---|---|
-| ![Penuh](docs/screenshots/rumah_penuh.png) | ![Hemat](docs/screenshots/rumah_hemat.png) | ![Minimal](docs/screenshots/rumah_minimal.png) |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/rumah_penuh.png" width="230" alt="Penuh"> | <img src="docs/screenshots/rumah_hemat.png" width="230" alt="Hemat"> | <img src="docs/screenshots/rumah_minimal.png" width="230" alt="Minimal"> |
 | Shader caustics, 36 gelembung parallax 3 lapis, berkas cahaya sampai dasar, kilatan naik level | Caustics fallback (pita cahaya ter-clip presisi ke bentuk karang & pasir), separuh gelembung, tanpa berkas cahaya | Terumbu beku; animasi hanya feedback singkat saat aksi dicatat |
 
 Semua angka efek (jumlah gelembung, durasi, dsb.) terpusat di
