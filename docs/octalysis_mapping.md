@@ -10,11 +10,11 @@ Status kolom: `belum` = belum ada kode, `sebagian` = ada tapi belum lengkap, `ja
 | CD1 | Epic Meaning & Calling | Narasi "Jaga laut Indonesia", counter kolektif, kartu fakta | Splash, Home, Komunitas | sebagian | `features/onboarding/presentation/splash_screen.dart` (narasi); counter belum |
 | CD2 | Development & Accomplishment | XP, level, badge, target mingguan, progress terumbu | Log Aksi, Home | jadi | `core/utils/game_logic.dart`, `features/actions`, `features/home` (XP/streak/dampak hidup) |
 | CD3 | Empowerment of Creativity & Feedback | Glowing Choice, pilih tantangan, dekorasi | Onboarding, Koleksi | sebagian | `features/onboarding/presentation/glowing_choice_screen.dart`; dekorasi belum |
-| CD4 | Ownership & Possession | Terumbu pribadi, koleksi spesies/dekorasi | Home, Koleksi | sebagian | `shared/widgets/reef_painter.dart` (terumbu tumbuh per tahap, naik via aksi); dekorasi belum |
+| CD4 | Ownership & Possession | Terumbu pribadi, koleksi spesies/dekorasi | Home, Koleksi | sebagian | `shared/widgets/reef_scene.dart` + `reef_painter.dart` (terumbu hidup: tumbuh tiap aksi, spesies baru per tahap, burst saat log); dekorasi belum |
 | CD5 | Social Influence & Relatedness | Leaderboard mock, tim, share kartu | Komunitas, Dampak | jadi | `features/community` (leaderboard/tim/challenge mock), share mock di `features/impact` |
 | CD6 | Scarcity & Impatience | Spesies musiman, voucher kuota terbatas | Event, Hadiah | sebagian | `features/rewards` (kuota + label simulasi); event musiman Tahap 6 |
 | CD7 | Unpredictability & Curiosity | Mystery Chest, fakta acak, mini-game | Quest, Home | jadi | `core/utils/chest.dart`, `features/minigame` (Pilah Cepat 30 detik) |
-| CD8 | Loss & Avoidance | Karang memudar (−25/hari mulai hari ke-4, pulih dgn 1 aksi), streak + freeze | Home | jadi | `core/utils/game_logic.dart` (`reefHealthOn` + pemulihan via aksi), `reef_painter.dart` (warna memudar) |
+| CD8 | Loss & Avoidance | Karang memudar (−25/hari mulai hari ke-4, pulih dgn 1 aksi), streak + freeze | Home | jadi | `core/utils/game_logic.dart` (`reefHealthOn` + pemulihan via aksi), `reef_painter.dart` (warna memudar + cahaya/gelembung meredup) |
 
 ## Fitur Tahap 3 yang terlihat saat demo (2026-11-23)
 - Layar **Catat Aksi**: 6 kartu aksi (XP per jenis sesuai spec §7.1), kebiasaan fokus dari Glowing Choice terpilih otomatis + label "Kebiasaan utamamu" (CD3), switch foto bukti simulasi (tanpa kamera).
@@ -57,6 +57,17 @@ Status kolom: `belum` = belum ada kode, `sebagian` = ada tapi belum lengkap, `ja
 - **Daily Quest rotasi 2 hari** (CD7: variasi harian mencegah kebosanan): genap → "Catat 3 aksi bebas plastik hari ini"; gasal → "Coba 2 jenis aksi yang belum kamu catat 3 hari terakhir".
 - **Ambang tahap terumbu** diturunkan agar sesuai ritme baru: Tunas 0–5, Tumbuh 6–17, Subur 18–39, Ekosistem 40+ (CD4/CD2: pertumbuhan terasa di 2 minggu uji).
 - **Catatan aksi lama tidak ditulis ulang:** status "selesai hari ini" dihitung dari log hari ini; generator data contoh mematuhi aturan baru.
+
+## Revisi Unit B — visual terumbu hidup (2026-11-23)
+- **Pertumbuhan mulus dalam tahap:** tiap aksi menaikkan fraksi growth (0..1) → karang membesar, polip di ujung cabang bertambah, meski belum berganti tahap (CD4: milikku tumbuh karena aku — umpan balik per aksi, bukan per tahap saja).
+- **5 spesies prosedural** (CustomPainter, tanpa aset eksternal): bercabang + rumput laut sejak Tunas; karang meja di Tumbuh; karang otak di Subur; kipas laut di Ekosistem (CD2/CD6: spesies baru = kejutan pencapaian).
+- **Dasar laut:** pasir bergelombang, batu, gradien kedalaman, 3 pita cahaya tipis (CD1: dunia yang terasa hidup, bukan diagram).
+- **Caustics:** fragment shader `assets/shaders/caustics.frag` (BlendMode.screen, intensitas mengikuti kesehatan karang); fallback dua lapis pita cahaya bergeser jika shader gagal dimuat.
+- **Gelembung:** 26 (Penuh) / 13 (Hemat) dengan ukuran, kecepatan, goyang sinus, dan kedalaman parallax berbeda.
+- **Hook state (CD6 reward loop):** aksi tercatat → burst gelembung + karang terbaru scale-in + haptic; health turun → cahaya meredup, gelembung jarang, warna pucat; naik level → kilatan cahaya singkat.
+- **Kinerja:** satu AnimationController untuk semua animasi, RepaintBoundary, pause saat tab nonaktif (TickerMode IndexedStack) / app background, hormati `MediaQuery.disableAnimations`; tidak ada alokasi Paint/Path per frame (layout karang/gelembung di-cache, warna bleaching di-cache).
+- **Setelan "Kualitas efek: Penuh / Hemat"** di Profil (dekat Demo Mode), tersimpan lokal, default Penuh. Hemat = fallback caustics + separuh gelembung.
+- Verifikasi di emulator saja (keputusan pengguna); FPS emulator tidak mewakili HP asli — dicatat jujur di laporan.
 
 ## Catatan
 - Black Hat (CD6–8) tidak boleh menghukum: pesan kehilangan bernada ajakan, streak freeze selalu tersedia maks 2.
