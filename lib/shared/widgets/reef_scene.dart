@@ -132,11 +132,15 @@ class _ReefSceneState extends ConsumerState<ReefScene>
   }
 
   void _handleActionLogged() {
-    final t = _visual.time;
+    final minimal = _quality == EffectQuality.minimal;
+    // Minimal membeku di frame statis; feedback harus mulai dari waktu itu,
+    // bukan dari nilai controller terakhir kali ambient berhenti.
+    final t = minimal ? VisualConfig.staticFrameSeconds : _visual.time;
     _burstStart = t;
     _popStart = t;
     HapticFeedback.lightImpact();
-    if (_quality == EffectQuality.minimal) {
+    if (minimal) {
+      _controller.value = t / VisualConfig.loopSeconds;
       // Minimal: animasi hanya segaris feedback singkat lalu berhenti lagi.
       final span =
           VisualConfig.minimalFeedbackSeconds / VisualConfig.loopSeconds;
