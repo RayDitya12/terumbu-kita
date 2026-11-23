@@ -6,6 +6,7 @@ import 'package:terumbu_kita/core/providers.dart';
 import 'package:terumbu_kita/data/models/action_log.dart';
 import 'package:terumbu_kita/data/models/app_settings.dart';
 import 'package:terumbu_kita/data/models/collection.dart';
+import 'package:terumbu_kita/data/models/quest.dart';
 import 'package:terumbu_kita/data/models/progress.dart';
 import 'package:terumbu_kita/data/models/user_profile.dart';
 import 'package:terumbu_kita/data/repositories/local_storage_repository.dart';
@@ -17,6 +18,7 @@ Future<LocalStorageRepository> pumpTerumbuApp(
   Progress progress = const Progress(),
   AppSettings settings = const AppSettings(),
   List<ActionLog> actionLogs = const [],
+  List<Quest> quests = const [],
 }) async {
   SharedPreferences.setMockInitialValues({});
   final repository = await LocalStorageRepository.create();
@@ -40,6 +42,7 @@ Future<LocalStorageRepository> pumpTerumbuApp(
         collectionProvider.overrideWith(
           () => CollectionNotifier(repository, const Collection()),
         ),
+        questsProvider.overrideWith(() => QuestsNotifier(repository, quests)),
       ],
       child: const TerumbuApp(),
     ),

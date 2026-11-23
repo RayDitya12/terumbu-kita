@@ -13,7 +13,7 @@ Status kolom: `belum` = belum ada kode, `sebagian` = ada tapi belum lengkap, `ja
 | CD4 | Ownership & Possession | Terumbu pribadi, koleksi spesies/dekorasi | Home, Koleksi | sebagian | `shared/widgets/reef_painter.dart` (terumbu tumbuh per tahap, naik via aksi); dekorasi belum |
 | CD5 | Social Influence & Relatedness | Leaderboard mock, tim, share kartu | Komunitas, Dampak | sebagian | `splash_screen.dart` (sinyal "teman bergabung" mock); leaderboard belum |
 | CD6 | Scarcity & Impatience | Spesies musiman, voucher kuota terbatas | Event, Hadiah | belum | Tahap 5/6 |
-| CD7 | Unpredictability & Curiosity | Mystery Chest, fakta acak, mini-game | Quest, Home | belum | Tahap 4/6 |
+| CD7 | Unpredictability & Curiosity | Mystery Chest, fakta acak, mini-game | Quest, Home | sebagian | `core/utils/chest.dart` (undian berbobot 1x/hari); mini-game Tahap 6 |
 | CD8 | Loss & Avoidance | Karang memudar (−25/hari mulai hari ke-4, pulih dgn 1 aksi), streak + freeze | Home | jadi | `core/utils/game_logic.dart` (`reefHealthOn` + pemulihan via aksi), `reef_painter.dart` (warna memudar) |
 
 ## Fitur Tahap 3 yang terlihat saat demo (2026-11-23)
@@ -22,6 +22,11 @@ Status kolom: `belum` = belum ada kode, `sebagian` = ada tapi belum lengkap, `ja
 - Win-State #2: bottom sheet animasi (+XP, gram + padanan sedotan, streak, badge "Penyelam Baru"); Win-State #3 dipicu saat tahap terumbu/streak milestone naik.
 - Home kini hidup: bar XP, streak, dan angka "plastik dihindari" terhubung ke data; terumbu bertambah besar saat total aksi melewati ambang tahap.
 - Persistensi: ActionLog + badge Collection tersimpan lokal dan terverifikasi lewat tes.
+
+## Fitur Tahap 4 yang terlihat saat demo (2026-11-23)
+- Layar **Misi**: Daily Quest "3 aksi hari ini" dengan bar progres, hadiah +15 XP otomatis saat selesai (Win-State #4), target mingguan 5 aksi, dan **Mystery Chest** 1x/hari (undian XP/freeze/dekorasi/fakta, dialog hadiah).
+- Layar **Dampak**: total gram + padanan sedotan, grafik bar 7 hari (fl_chart), tombol share kartu dampak (simulasi toast).
+- Streak freeze dari chest langsung dipakai logika aksi (gap 1 hari terselamatkan).
 
 ## Fitur Tahap 2 yang terlihat saat demo (2026-11-23)
 - Alur onboarding penuh: Splash bernarasi → 3 slide intro → **Glowing Choice** (4 kartu besar, "Bawa Tumbler" disarankan & terpilih otomatis) → nama + avatar → Home.

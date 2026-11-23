@@ -124,12 +124,39 @@ abstract final class AppStrings {
   static const winReefBornCta = 'Ayo mulai';
 
   // Placeholder layar yang belum dibangun (spec.md §12).
-  static const placeholderQuest =
-      'Daily Quest & Mystery Chest dibangun di Tahap 4.';
-  static const placeholderImpact =
-      'Grafik dampak mingguan dibangun di Tahap 4.';
   static const placeholderCommunity =
       'Leaderboard & tim (mock) dibangun di Tahap 5.';
   static const placeholderProfile =
       'Profil, Demo Mode, dan reset data dibangun di Tahap 5.';
+
+  // Quest harian & Mystery Chest (spec.md §6.1 layar 5).
+  static const questTitle = 'Misi Harian';
+  static const questDailyReward = 'Hadiah selesai: +15 XP';
+  static const questCompleted = 'Selesai! Hadiah XP sudah masuk.';
+  static const questProgressFormat = 'progress aksi hari ini';
+  static const questWeeklyTitle = 'Target Mingguan';
+  static const questWeeklyBody = 'Kumpulkan 5 aksi minggu ini.';
+  static const questWeeklyDone =
+      'Target mingguan tercapai! Spesies baru menantimu di Koleksi.';
+  static const chestOpen = 'Buka Mystery Chest';
+  static const chestLockedHint =
+      'Selesaikan misi harian dulu untuk membuka chest hari ini.';
+  static const chestOpenedToday =
+      'Chest hari ini sudah dibuka. Sampai jumpa besok!';
+  static const chestRewardTitle = 'Isi chest untukmu:';
+  static const chestRewardXp = 'bonus XP dari laut.';
+  static const chestRewardFreeze =
+      'Streak freeze! Satu hari terlewat tidak akan memutus streak.';
+  static const chestRewardDecoration = 'Dekorasi terumbu baru tersimpan.';
+  static const chestRewardFact = 'Fakta laut baru untukmu:';
+
+  // Layar Dampak (spec.md §6.1 layar 7).
+  static const impactTitle = 'Dampak Nyata Aksimu';
+  static const impactTotalLabel = 'total plastik dihindari';
+  static const impactWeekLabel = '7 hari terakhir (gram)';
+  static const impactNoData =
+      'Belum ada aksi tercatat. Satu aksi pun sudah berarti.';
+  static const impactShare = 'Bagikan kartu dampak';
+  static const impactShareMock =
+      'Kartu dampak (simulasi prototipe) siap dibagikan.';
 }

@@ -1,12 +1,16 @@
+import 'dart:math' as math;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/models/action_log.dart';
 import '../data/models/app_settings.dart';
 import '../data/models/collection.dart';
 import '../data/models/progress.dart';
+import '../data/models/quest.dart';
 import '../data/models/user_profile.dart';
 import '../data/repositories/local_storage_repository.dart';
 import 'constants/game_rules.dart';
+import 'utils/chest.dart';
 import 'utils/clock.dart';
 import 'utils/game_logic.dart';
 
@@ -137,7 +141,23 @@ class ProgressNotifier extends Notifier<Progress> {
     if (outcome.stageUp != null) {
       await badges.addBadge('stage_${outcome.stageUp!.name}');
     }
+
+    // CD2 + CD7: aksi memajukan Daily Quest; hadiah XP diberikan saat selesai.
+    await ref.read(questsProvider.notifier).addProgress(today, 1);
     return outcome;
+  }
+
+  /// XP bonus dari luar aksi (hadiah quest). Level-up berantai berlaku sama.
+  Future<XpOutcome> addBonusXp(int amount) async {
+    final outcome = applyXp(state, amount);
+    await save(outcome.progress);
+    return outcome;
+  }
+
+  /// Menambah streak freeze dari Mystery Chest, dibatasi maks 2 (spec §7.2).
+  Future<void> addFreeze(int amount) async {
+    final total = math.min(GameRules.maxFreezes, state.freezes + amount);
+    await save(state.copyWith(freezes: total));
   }
 }
 
@@ -179,8 +199,97 @@ class CollectionNotifier extends Notifier<Collection> {
     state = state.copyWith(badges: [...state.badges, badgeId]);
     await _repository.saveCollection(state);
   }
+
+  Future<void> addDecoration(String decorationId) async {
+    if (state.decorationsOwned.contains(decorationId)) return;
+    state = state.copyWith(
+      decorationsOwned: [...state.decorationsOwned, decorationId],
+    );
+    await _repository.saveCollection(state);
+  }
 }
 
 final collectionProvider = NotifierProvider<CollectionNotifier, Collection>(
+  () => throw UnimplementedError('di-override di main()'),
+);
+
+class QuestsNotifier extends Notifier<List<Quest>> {
+  QuestsNotifier(this._repository, this._initial);
+
+  final LocalStorageRepository _repository;
+  final List<Quest> _initial;
+
+  @override
+  List<Quest> build() => _initial;
+
+  Quest? _findDaily(DateTime day) {
+    final date = Clock.dateOnly(day);
+    for (final quest in state) {
+      if (quest.date == date && quest.id.startsWith('daily-')) return quest;
+    }
+    return null;
+  }
+
+  /// Pastikan quest harian hari [day] ada (dibuat saat pertama dibuka).
+  Future<Quest> ensureDailyQuest(DateTime day) async {
+    final existing = _findDaily(day);
+    if (existing != null) return existing;
+    final quest = dailyQuestFor(day);
+    state = [...state, quest];
+    await _repository.saveQuests(state);
+    return quest;
+  }
+
+  /// Menambahkan progres ke Daily Quest [day]; memberi hadiah XP saat
+  /// quest baru selesai (Win-State #4).
+  Future<Quest?> addProgress(DateTime day, int delta) async {
+    final quest = await ensureDailyQuest(day);
+    final progress = math.min(quest.targetCount, quest.progress + delta);
+    final nowCompleted = !quest.completed && progress >= quest.targetCount;
+    final updated = quest.copyWith(progress: progress);
+    state = [for (final q in state) q.id == quest.id ? updated : q];
+    if (nowCompleted) {
+      final rewarded = updated.copyWith(completed: true);
+      state = [for (final q in state) q.id == quest.id ? rewarded : q];
+      await ref.read(progressProvider.notifier).addBonusXp(quest.rewardXp);
+      await _repository.saveQuests(state);
+      return rewarded;
+    }
+    await _repository.saveQuests(state);
+    return null;
+  }
+
+  /// Membuka Mystery Chest hari [today]; null jika belum berhak.
+  Future<ChestReward?> openChest(DateTime today, {math.Random? rng}) async {
+    final quest = _findDaily(today);
+    final settings = ref.read(settingsProvider);
+    if (!chestAvailable(
+      dailyQuestCompleted: quest?.completed ?? false,
+      lastChestDate: settings.lastChestDate,
+      today: today,
+    )) {
+      return null;
+    }
+    final reward = pickChestReward(rng ?? math.Random());
+    await ref
+        .read(settingsProvider.notifier)
+        .update(settings.copyWith(lastChestDate: Clock.dateOnly(today)));
+    switch (reward.type) {
+      case ChestRewardType.xp:
+        await ref.read(progressProvider.notifier).addBonusXp(reward.value);
+      case ChestRewardType.freeze:
+        await ref.read(progressProvider.notifier).addFreeze(reward.value);
+      case ChestRewardType.decoration:
+        await ref
+            .read(collectionProvider.notifier)
+            .addDecoration('deco_${reward.value}');
+      case ChestRewardType.fact:
+        break; // fakta ditampilkan di UI, tidak perlu disimpan.
+    }
+    return reward;
+  }
+}
+
+final questsProvider = NotifierProvider<QuestsNotifier, List<Quest>>(
   () => throw UnimplementedError('di-override di main()'),
 );

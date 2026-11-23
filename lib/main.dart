@@ -16,6 +16,7 @@ Future<void> main() async {
   final progress = await repository.loadProgress();
   final actionLogs = await repository.loadActionLogs();
   final collection = await repository.loadCollection();
+  final quests = await repository.loadQuests();
 
   // CD8: karang memudar saat aplikasi tidak dibuka; dihitung ulang di
   // startup memakai Clock (mendukung offset Demo Mode).
@@ -46,6 +47,7 @@ Future<void> main() async {
         collectionProvider.overrideWith(
           () => CollectionNotifier(repository, collection),
         ),
+        questsProvider.overrideWith(() => QuestsNotifier(repository, quests)),
       ],
       child: const TerumbuApp(),
     ),

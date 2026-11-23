@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import '../constants/game_rules.dart';
 import '../constants/impact_constants.dart';
 import '../../data/models/progress.dart';
+import '../../data/models/quest.dart';
 import 'clock.dart';
 
 /// Fungsi murni logika game — terpisah dari UI agar mudah diuji
@@ -71,7 +72,48 @@ class ActionOutcome {
   final int? streakMilestone;
 }
 
-/// Menerapkan satu aksi ke [progress] pada hari [today], dengan
+/// Hasil penambahan XP bonus (mis. dari Daily Quest) ke progress.
+class XpOutcome {
+  const XpOutcome({
+    required this.progress,
+    required this.leveledUp,
+    required this.xpGranted,
+  });
+
+  final Progress progress;
+  final bool leveledUp;
+  final int xpGranted;
+}
+
+/// Menambahkan [amount] XP dengan kenaikan level berantai (spec.md §7.2).
+XpOutcome applyXp(Progress progress, int amount) {
+  var xp = progress.xp + amount;
+  var level = progress.level;
+  while (xp >= GameRules.xpNeededForLevel(level)) {
+    xp -= GameRules.xpNeededForLevel(level);
+    level += 1;
+  }
+  return XpOutcome(
+    progress: progress.copyWith(xp: xp, level: level),
+    leveledUp: level > progress.level,
+    xpGranted: amount,
+  );
+}
+
+/// Daily Quest deterministik untuk hari [day] (spec.md §6.1 layar 5).
+/// CD2 + CD7: satu target kecil harian yang membuka Mystery Chest.
+Quest dailyQuestFor(DateTime day) {
+  final date = Clock.dateOnly(day);
+  return Quest(
+    id: 'daily-${date.year}-${date.month}-${date.day}',
+    title: 'Catat 3 aksi bebas plastik hari ini',
+    targetCount: 3,
+    date: date,
+    rewardXp: 15,
+  );
+}
+
+/// Hasil penerapan satu aksi ke [progress] pada hari [today], dengan
 /// [actionsToday] = jumlah aksi yang sudah dicatat hari ini.
 ///
 /// Semua aturan dari spec.md §7.2: batas XP harian, streak + freeze,
