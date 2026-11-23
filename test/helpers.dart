@@ -46,6 +46,10 @@ Future<LocalStorageRepository> pumpTerumbuApp(
 }) async {
   SharedPreferences.setMockInitialValues({});
   final repository = await LocalStorageRepository.create();
+  // ReefScene (Unit B) menganimasi terus; matikan animasi agar
+  // pumpAndSettle tetap berhenti seperti sebelumnya.
+  tester.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
 
   await tester.pumpWidget(
     ProviderScope(

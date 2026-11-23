@@ -28,6 +28,21 @@ int? actionsUntilNextReefStage(int totalActions) {
   return ReefStage.values[nextIndex].minActions - totalActions;
 }
 
+/// Proporsi pertumbuhan (0..1) di dalam tahap terumbu saat ini.
+///
+/// Unit B: tiap aksi memperbesar karang sedikit meski belum berganti tahap.
+/// Tahap maksimum (Ekosistem) memakai rentang imajiner 20 aksi terakhir.
+double reefGrowthFraction(int totalActions) {
+  final stages = ReefStage.values;
+  final stage = reefStageFor(totalActions);
+  final index = stages.indexOf(stage);
+  final lo = stage.minActions;
+  final hi = index + 1 < stages.length
+      ? stages[index + 1].minActions
+      : lo + 20;
+  return ((totalActions - lo + 1) / (hi - lo)).clamp(0.0, 1.0);
+}
+
 /// Kesehatan karang yang tampil pada [today] (spec.md §7.2 "karang memudar").
 ///
 /// CD8: memudar linear -25/hari mulai hari ke-4 tanpa aksi, bisa pulih

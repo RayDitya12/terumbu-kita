@@ -6,6 +6,7 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/game_logic.dart';
+import '../../../data/models/app_settings.dart';
 
 /// Profil & Pengaturan + Demo Mode (spec.md §6.1 layar 11, §8).
 class ProfileScreen extends ConsumerWidget {
@@ -91,6 +92,58 @@ class ProfileScreen extends ConsumerWidget {
             onPressed: () => context.push('/octalysis'),
           ),
           const SizedBox(height: 16),
+          // Unit B: setelan kualitas efek terumbu, disimpan lokal.
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          AppStrings.profileQualityTitle,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      SegmentedButton<EffectQuality>(
+                        showSelectedIcon: false,
+                        style: const ButtonStyle(
+                          visualDensity: VisualDensity.compact,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        segments: const [
+                          ButtonSegment(
+                            value: EffectQuality.full,
+                            label: Text(AppStrings.profileQualityFull),
+                          ),
+                          ButtonSegment(
+                            value: EffectQuality.hemat,
+                            label: Text(AppStrings.profileQualityHemat),
+                          ),
+                        ],
+                        selected: {settings.effectQuality},
+                        onSelectionChanged: (selection) => ref
+                            .read(settingsProvider.notifier)
+                            .update(
+                              settings.copyWith(effectQuality: selection.first),
+                            ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    AppStrings.profileQualityHint,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           Card(
             color: AppTheme.healthWarn.withValues(alpha: 0.08),
             child: Padding(
