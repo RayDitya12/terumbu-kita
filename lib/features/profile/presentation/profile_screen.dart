@@ -155,7 +155,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           Card(
-            color: AppTheme.healthWarn.withValues(alpha: 0.08),
+            color: AppTheme.amberTint,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -163,10 +163,7 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(
-                        Icons.science_outlined,
-                        color: AppTheme.healthWarn,
-                      ),
+                      const Icon(Icons.science_outlined, color: AppTheme.amberInk),
                       const SizedBox(width: 8),
                       Text(
                         AppStrings.demoModeTitle,

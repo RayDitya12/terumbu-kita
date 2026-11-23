@@ -97,6 +97,7 @@ void main() {
     await tester.tap(find.text(AppStrings.navImpact));
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.impactNoData), findsOneWidget);
+    expect(find.text(AppStrings.impactNoDataHint), findsOneWidget);
   });
 
   testWidgets('kartu quest memakai judul rotasi harian (spec §7.2 Unit A)', (

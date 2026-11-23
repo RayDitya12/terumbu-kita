@@ -28,6 +28,7 @@ class ImpactScreen extends ConsumerWidget {
         _gramsOn(logs, today.subtract(Duration(days: i))),
     ];
     final hasData = logs.isNotEmpty;
+    final maxGrams = dailyGrams.fold<double>(0, (m, g) => g > m ? g : m);
 
     return Scaffold(
       appBar: AppBar(title: const Text(AppStrings.impactTitle)),
@@ -76,9 +77,28 @@ class ImpactScreen extends ConsumerWidget {
                   if (!hasData)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 24),
-                      child: Text(
-                        AppStrings.impactNoData,
-                        style: theme.textTheme.bodyMedium,
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.eco_outlined,
+                            size: 40,
+                            color: AppTheme.reefGradientBottom,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            AppStrings.impactNoData,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            AppStrings.impactNoDataHint,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
                     )
                   else
@@ -86,6 +106,7 @@ class ImpactScreen extends ConsumerWidget {
                       height: 180,
                       child: BarChart(
                         BarChartData(
+                          maxY: maxGrams * 1.25,
                           borderData: FlBorderData(show: false),
                           gridData: FlGridData(show: false),
                           titlesData: FlTitlesData(
@@ -117,6 +138,17 @@ class ImpactScreen extends ConsumerWidget {
                                     width: 18,
                                     color: AppTheme.coralAccent,
                                     borderRadius: BorderRadius.circular(6),
+                                    // Label angka di atas tiap bar.
+                                    label: BarChartRodLabel(
+                                      show: dailyGrams[i] > 0,
+                                      text: dailyGrams[i].toStringAsFixed(0),
+                                      offset: const Offset(0, -10),
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: AppTheme.reefGradientBottom,
+                                          ),
+                                    ),
                                   ),
                                 ],
                               ),

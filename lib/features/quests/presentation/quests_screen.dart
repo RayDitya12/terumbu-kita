@@ -134,8 +134,9 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
           const SizedBox(height: 12),
           // CD6: event musiman (banner simulasi) + pintu mini-game (CD7).
           Card(
-            color: AppTheme.coralAccent.withValues(alpha: 0.10),
+            color: AppTheme.coralTint,
             child: ListTile(
+              iconColor: AppTheme.coralAccent,
               leading: const Icon(Icons.local_activity),
               title: const Text(AppStrings.eventTitle),
               subtitle: const Text(AppStrings.eventBody),
