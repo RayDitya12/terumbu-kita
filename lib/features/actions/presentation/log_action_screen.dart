@@ -219,16 +219,17 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final showSelected = selected && !done;
     return Card(
-      elevation: selected ? 4 : 1,
+      elevation: showSelected ? 4 : 1,
       color: done
           ? theme.colorScheme.secondaryContainer
-          : selected
+          : showSelected
           ? theme.colorScheme.surface
           : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
-        side: selected
+        side: showSelected
             ? const BorderSide(color: AppTheme.coralAccent, width: 3)
             : BorderSide.none,
       ),
