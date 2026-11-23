@@ -18,7 +18,7 @@ Status kolom: `belum` = belum ada kode, `sebagian` = ada tapi belum lengkap, `ja
 
 ## Fitur Tahap 3 yang terlihat saat demo (2026-11-23)
 - Layar **Catat Aksi**: 6 kartu aksi (XP per jenis sesuai spec §7.1), kebiasaan fokus dari Glowing Choice terpilih otomatis + label "Kebiasaan utamamu" (CD3), switch foto bukti simulasi (tanpa kamera).
-- Logika penuh: XP + level-up berantai, streak + freeze (gap 1 hari terselamatkan, gap ≥2 putus), batas 10 aksi XP/hari (tetap dicatat tanpa XP, pesan non-punitif), karang pulih ke 100, memudar dihitung saat startup via Clock.
+- Logika penuh: XP + level-up berantai, streak + freeze (gap 1 hari terselamatkan, gap ≥2 putus), karang pulih ke 100, memudar dihitung saat startup via Clock. (Batas lama "10 XP/hari" sudah diganti — lihat keputusan Unit A di bawah.)
 - Win-State #2: bottom sheet animasi (+XP, gram + padanan sedotan, streak, badge "Penyelam Baru"); Win-State #3 dipicu saat tahap terumbu/streak milestone naik.
 - Home kini hidup: bar XP, streak, dan angka "plastik dihindari" terhubung ke data; terumbu bertambah besar saat total aksi melewati ambang tahap.
 - Persistensi: ActionLog + badge Collection tersimpan lokal dan terverifikasi lewat tes.
@@ -47,8 +47,16 @@ Status kolom: `belum` = belum ada kode, `sebagian` = ada tapi belum lengkap, `ja
 
 ## Keputusan aturan game yang disetujui pengguna (2026-11-23)
 - Laju karang memudar: linear, mulai hari ke-4 tanpa aksi turun 25 poin kesehatan per hari, minimum 0; 1 aksi memulihkan penuh ke 100.
-- Target mingguan: 5 aksi.
+- Target mingguan: 12 aksi (revisi Unit A; sebelumnya 5).
 - Nama prototipe: "Terumbu Kita" (working title).
+
+## Revisi Unit A — mekanisme "1 aksi per jenis per hari" (2026-11-23)
+- **Aturan inti:** tiap jenis aksi (6 jenis, spec §7.1) hanya bisa dicatat 1× per hari kalender (via `Clock`, Demo Mode ikut). Batas lama "10 aksi/hari" dihapus — keberagaman, bukan frekuensi, yang dihargai (CD2: tantangan harian jadi "selesaikan variasi", bukan spam).
+- **Plafon XP harian:** 55 XP aksi + 10 XP Hari Sempurna + 15 XP Daily Quest = maks 80/hari.
+- **Hari Sempurna:** keenam jenis tercatat dalam satu hari → +10 XP + pesan perayaan (CD2 + CD7: target yang jarang tercapai memberi kejutan).
+- **Daily Quest rotasi 2 hari** (CD7: variasi harian mencegah kebosanan): genap → "Catat 3 aksi bebas plastik hari ini"; gasal → "Coba 2 jenis aksi yang belum kamu catat 3 hari terakhir".
+- **Ambang tahap terumbu** diturunkan agar sesuai ritme baru: Tunas 0–5, Tumbuh 6–17, Subur 18–39, Ekosistem 40+ (CD4/CD2: pertumbuhan terasa di 2 minggu uji).
+- **Catatan aksi lama tidak ditulis ulang:** status "selesai hari ini" dihitung dari log hari ini; generator data contoh mematuhi aturan baru.
 
 ## Catatan
 - Black Hat (CD6–8) tidak boleh menghukum: pesan kehilangan bernada ajakan, streak freeze selalu tersedia maks 2.
