@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/game_logic.dart';
+import '../../../data/models/app_settings.dart';
 
 /// Profil & Pengaturan + Demo Mode (spec.md §6.1 layar 11, §8).
 class ProfileScreen extends ConsumerWidget {
@@ -20,13 +23,21 @@ class ProfileScreen extends ConsumerWidget {
     final badges = ref.watch(collectionProvider).badges.toSet();
     final title = userTitle(level: progress.level, badges: badges);
 
-    Future<void> advance(int days) => ref
-        .read(settingsProvider.notifier)
-        .update(
-          settings.copyWith(
-            simulatedDateOffsetDays: settings.simulatedDateOffsetDays + days,
-          ),
-        );
+    Future<void> advance(int days) async {
+      final next = settings.copyWith(
+        // Offset tidak pernah negatif: mundur dibatasi sampai hari asli.
+        simulatedDateOffsetDays: math.max(
+          0,
+          settings.simulatedDateOffsetDays + days,
+        ),
+      );
+      await ref.read(settingsProvider.notifier).update(next);
+      // CD8: geser tanggal Demo Mode menghitung ulang memudarnya karang,
+      // termasuk memulihkan warna saat mundur ke hari terakhir ada aksi.
+      await ref
+          .read(progressProvider.notifier)
+          .applyDecay(ref.read(clockProvider).today);
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text(AppStrings.profileScreenTitle)),
@@ -91,6 +102,58 @@ class ProfileScreen extends ConsumerWidget {
             onPressed: () => context.push('/octalysis'),
           ),
           const SizedBox(height: 16),
+          // Unit B: setelan kualitas efek terumbu, disimpan lokal.
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          AppStrings.profileQualityTitle,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      SegmentedButton<EffectQuality>(
+                        showSelectedIcon: false,
+                        style: const ButtonStyle(
+                          visualDensity: VisualDensity.compact,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        segments: const [
+                          ButtonSegment(
+                            value: EffectQuality.full,
+                            label: Text(AppStrings.profileQualityFull),
+                          ),
+                          ButtonSegment(
+                            value: EffectQuality.hemat,
+                            label: Text(AppStrings.profileQualityHemat),
+                          ),
+                        ],
+                        selected: {settings.effectQuality},
+                        onSelectionChanged: (selection) => ref
+                            .read(settingsProvider.notifier)
+                            .update(
+                              settings.copyWith(effectQuality: selection.first),
+                            ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    AppStrings.profileQualityHint,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           Card(
             color: AppTheme.healthWarn.withValues(alpha: 0.08),
             child: Padding(
@@ -135,6 +198,14 @@ class ProfileScreen extends ConsumerWidget {
                       FilledButton.tonal(
                         onPressed: () => advance(7),
                         child: const Text(AppStrings.demoAdvance7),
+                      ),
+                      FilledButton.tonal(
+                        onPressed: () => advance(-1),
+                        child: const Text(AppStrings.demoBack1),
+                      ),
+                      FilledButton.tonal(
+                        onPressed: () => advance(-7),
+                        child: const Text(AppStrings.demoBack7),
                       ),
                       FilledButton.tonal(
                         onPressed: () => ref

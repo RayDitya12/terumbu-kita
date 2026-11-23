@@ -202,6 +202,11 @@ abstract final class AppStrings {
   static const profileScreenTitle = 'Profil & Pengaturan';
   static const profileTitleLabel = 'Gelar';
   static const profileNotifications = 'Notifikasi pengingat (UI saja)';
+  static const profileQualityTitle = 'Kualitas efek';
+  static const profileQualityFull = 'Penuh';
+  static const profileQualityHemat = 'Hemat';
+  static const profileQualityHint =
+      'Hemat memakai cahaya alternatif dan separuh gelembung.';
   static const profileCollectionLink = 'Buka Koleksi';
   static const profileRewardsLink = 'Buka Hadiah';
   static const demoModeTitle = 'Demo Mode';
@@ -209,6 +214,8 @@ abstract final class AppStrings {
       'Untuk presentasi: geser waktu dan isi data contoh.';
   static const demoAdvance1 = 'Maju 1 hari';
   static const demoAdvance7 = 'Maju 7 hari';
+  static const demoBack1 = 'Mundur 1 hari';
+  static const demoBack7 = 'Mundur 7 hari';
   static const demoSampleData = 'Isi data contoh 2 minggu';
   static const demoReset = 'Reset semua data';
   static const demoOffsetLabel = 'Offset waktu saat ini: ';

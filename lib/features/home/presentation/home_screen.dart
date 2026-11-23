@@ -10,7 +10,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/utils/game_logic.dart';
 import '../../../data/models/progress.dart';
 import '../../../data/models/user_profile.dart';
-import '../../../shared/widgets/reef_painter.dart';
+import '../../../shared/widgets/reef_scene.dart';
 
 /// Home (Terumbu) — spec.md §6.1 layar 3.
 /// Tahap 2: visual statis; angka XP/streak/dampak sudah terhubung ke
@@ -95,9 +95,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             right: 0,
             bottom: 268,
             top: MediaQuery.sizeOf(context).height * 0.16,
-            child: CustomPaint(
-              painter: ReefPainter(stage: stage, health: progress.reefHealth),
-            ),
+            child: const ReefScene(),
           ),
           SafeArea(
             child: Padding(

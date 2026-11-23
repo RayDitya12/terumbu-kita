@@ -1,11 +1,24 @@
 import 'json_utils.dart';
 
+/// Kualitas efek visual terumbu (Unit B): Penuh = shader caustics +
+/// 26 gelembung; Hemat = fallback pita cahaya + separuh gelembung.
+enum EffectQuality {
+  full,
+  hemat;
+
+  static EffectQuality fromName(String name) => EffectQuality.values.firstWhere(
+    (q) => q.name == name,
+    orElse: () => EffectQuality.full,
+  );
+}
+
 /// Pengaturan aplikasi, termasuk Demo Mode (spec.md §7.3, §8).
 class AppSettings {
   const AppSettings({
     this.demoMode = false,
     this.simulatedDateOffsetDays = 0,
     this.notificationsEnabled = true,
+    this.effectQuality = EffectQuality.full,
     this.lastChestDate,
   });
 
@@ -13,6 +26,7 @@ class AppSettings {
     demoMode: asBool(json, 'demoMode'),
     simulatedDateOffsetDays: asInt(json, 'simulatedDateOffsetDays'),
     notificationsEnabled: asBool(json, 'notificationsEnabled', fallback: true),
+    effectQuality: EffectQuality.fromName(asString(json, 'effectQuality')),
     lastChestDate: asDate(json, 'lastChestDate'),
   );
 
@@ -21,6 +35,7 @@ class AppSettings {
   /// Pergeseran hari untuk Demo Mode; dibaca ulang oleh Clock provider.
   final int simulatedDateOffsetDays;
   final bool notificationsEnabled;
+  final EffectQuality effectQuality;
 
   /// Hari terakhir Mystery Chest dibuka (spec.md §7.2: 1x/hari).
   final DateTime? lastChestDate;
@@ -29,12 +44,14 @@ class AppSettings {
     bool? demoMode,
     int? simulatedDateOffsetDays,
     bool? notificationsEnabled,
+    EffectQuality? effectQuality,
     DateTime? lastChestDate,
   }) => AppSettings(
     demoMode: demoMode ?? this.demoMode,
     simulatedDateOffsetDays:
         simulatedDateOffsetDays ?? this.simulatedDateOffsetDays,
     notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+    effectQuality: effectQuality ?? this.effectQuality,
     lastChestDate: lastChestDate ?? this.lastChestDate,
   );
 
@@ -42,6 +59,7 @@ class AppSettings {
     'demoMode': demoMode,
     'simulatedDateOffsetDays': simulatedDateOffsetDays,
     'notificationsEnabled': notificationsEnabled,
+    'effectQuality': effectQuality.name,
     'lastChestDate': lastChestDate?.toIso8601String(),
   };
 }
