@@ -168,6 +168,9 @@ abstract final class AppStrings {
   static const impactWeekLabel = '7 hari terakhir (gram)';
   static const impactNoData =
       'Belum ada aksi tercatat. Satu aksi pun sudah berarti.';
+  static const impactNoDataHint =
+      'Catat aksi pertamamu lewat tombol "Catat Aksi" di halaman Rumah, '
+      'lalu grafik ini akan mengisi otomatis.';
   static const impactShare = 'Bagikan kartu dampak';
   static const impactShareMock =
       'Kartu dampak (simulasi prototipe) siap dibagikan.';
