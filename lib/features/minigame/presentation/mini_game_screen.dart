@@ -180,6 +180,7 @@ class _MiniGameScreenState extends ConsumerState<MiniGameScreen> {
                           key: const Key('answer-reuse'),
                           style: FilledButton.styleFrom(
                             backgroundColor: AppColors.teal,
+                            foregroundColor: AppColors.foam,
                             minimumSize: const Size(0, 64),
                           ),
                           onPressed: () => _answer(true),

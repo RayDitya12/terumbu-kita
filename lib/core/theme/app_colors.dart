@@ -19,6 +19,9 @@ abstract final class AppColors {
   static const Color amberInk = Color(0xFF8A5A00);
   static const Color inkSoft = Color(0xFF456068);
 
+  // Putih hangat untuk kartu di atas latar Foam.
+  static const Color warmWhite = Color(0xFFFFFDF8);
+
   // Tint kartu informatif (pemetaan ulang poles kecil ke palet baru).
   static const Color seaTint = seafoam;
   static const Color coralTint = Color(0xFFFFE9E1);

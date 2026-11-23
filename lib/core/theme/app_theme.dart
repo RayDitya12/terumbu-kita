@@ -44,6 +44,7 @@ abstract final class AppTheme {
 
   static ThemeData _base(Brightness brightness) {
     final scheme = _scheme(brightness);
+    final isDark = brightness == Brightness.dark;
     final base = ThemeData(colorScheme: scheme, useMaterial3: true);
     return base.copyWith(
       appBarTheme: AppBarTheme(
@@ -52,12 +53,16 @@ abstract final class AppTheme {
         centerTitle: true,
       ),
       cardTheme: CardThemeData(
+        color: isDark ? AppColors.darkCard : AppColors.warmWhite,
         clipBehavior: Clip.antiAlias,
         elevation: 1,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          // Koral khusus untuk CTA; foreground gelap agar lolos AA.
+          backgroundColor: AppColors.coral,
+          foregroundColor: AppColors.ink,
           minimumSize: const Size(0, 52),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           shape: RoundedRectangleBorder(
@@ -65,13 +70,31 @@ abstract final class AppTheme {
           ),
         ),
       ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: AppColors.teal,
+        linearTrackColor: isDark ? AppColors.darkCard : AppColors.seafoam,
+      ),
       navigationBarTheme: NavigationBarThemeData(
         height: 68,
-        labelTextStyle: WidgetStatePropertyAll(
-          TextStyle(
+        // Bar gelap menyatukan transisi Home imersif ke layar lain.
+        backgroundColor: AppColors.deepOcean,
+        indicatorColor: AppColors.seafoam,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? AppColors.teal
+                : AppColors.foam.withValues(alpha: 0.75),
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
             fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-            color: scheme.onSurface,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w700
+                : FontWeight.w600,
+            color: states.contains(WidgetState.selected)
+                ? AppColors.foam
+                : AppColors.foam.withValues(alpha: 0.75),
           ),
         ),
       ),
