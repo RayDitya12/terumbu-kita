@@ -10,7 +10,8 @@ uniform float uIntensity;
 out vec4 fragColor;
 
 /// Pita cahaya (caustics) bergaya jaring berkilau: dua lapis domain-warp
-/// sinusoidal. Puncak cahaya dekat permukaan, memudar mengikuti kedalaman.
+/// sinusoidal. Karena kini di-mask ke dasar, cahaya justru menguat mengikuti
+/// kedalaman (karang dan pasir paling terang, seperti foto referensi).
 void main() {
   vec2 fc = FlutterFragCoord().xy;
   vec2 uv = fc / max(uResolution, vec2(1.0));
@@ -25,7 +26,7 @@ void main() {
   float bands = sin(q.x * 2.6 + q.y * 2.2 + t) + sin(q.x * 3.1 - q.y * 1.7 - t * 1.4);
   float glow = pow(max(0.0, 1.0 - abs(bands)), 3.0);
 
-  float depthFalloff = mix(1.0, 0.2, smoothstep(0.0, 1.0, uv.y));
+  float depthFalloff = mix(0.75, 1.0, smoothstep(0.0, 1.0, uv.y));
   glow *= depthFalloff * uIntensity;
 
   vec3 tint = vec3(0.55, 0.85, 0.95);

@@ -31,6 +31,7 @@ void main() {
     // Pindah tab ke Profil menampilkan layar Demo Mode (Tahap 5).
     await tester.tap(find.text(AppStrings.navProfile));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text(AppStrings.demoModeTitle), 200);
     expect(find.text(AppStrings.demoModeTitle), findsOneWidget);
   });
 }

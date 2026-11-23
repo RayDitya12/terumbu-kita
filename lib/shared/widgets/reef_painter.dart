@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../core/constants/game_rules.dart';
+import '../../core/constants/visual_config.dart';
 
 /// Unit B: spesies karang prosedural (tanpa aset eksternal — agent.md §8).
 /// Spesies baru terbuka seiring naiknya tahap terumbu.
@@ -134,7 +135,9 @@ class ReefLayout {
         radius: 2 + rng.nextDouble() * 6,
         speed: 0.03 + rng.nextDouble() * 0.06,
         phase: rng.nextDouble(),
-        depth: rng.nextDouble(),
+        depth:
+            ((i % VisualConfig.bubbleParallaxLayers) + rng.nextDouble()) /
+            VisualConfig.bubbleParallaxLayers,
       );
     });
   }
@@ -173,6 +176,12 @@ class ReefVisualState extends ChangeNotifier {
 
   ui.FragmentProgram? causticsProgram;
 
+  /// Pita/caustics shader; mati pada mode Minimal.
+  bool showCaustics = true;
+
+  /// Berkas cahaya; hanya hidup pada mode Penuh.
+  bool showRays = true;
+
   void mutate(void Function() update) {
     update();
     notifyListeners();
@@ -210,19 +219,26 @@ class ReefPainter extends CustomPainter {
     ..style = PaintingStyle.stroke;
   final Paint _fill = Paint()..style = PaintingStyle.fill;
   final Path _path = Path();
+  final Path _maskPath = Path();
+  final Paint _layer = Paint();
+  bool _silhouette = false;
   ui.FragmentShader? _shader;
   List<Color>? _bleachedPalette;
   List<Color>? _detailPalette;
   int _bleachedForHealth = -1;
+  static const _silhouetteColor = Color(0xFFFFFFFF);
 
   @override
   void paint(Canvas canvas, Size size) {
     final s = state;
     final groundY = size.height - _sandTop;
-    _drawCaustics(canvas, size, s);
-    _drawLightRays(canvas, size, s);
     _drawSeabed(canvas, size, s);
     _drawCorals(canvas, size, groundY, s);
+    // Rays setelah dasar: berkas cahaya tampak menyambung sampai ke pasir.
+    if (s.showRays) _drawLightRays(canvas, size, s);
+    // Caustics setelah karang: pola cahaya dipotong tepat pada siluet
+    // karang + pasir (layer dstIn), bukan aura di sekitarnya.
+    if (s.showCaustics) _drawCaustics(canvas, size, groundY, s);
     _drawBubbles(canvas, size, groundY, s);
     _drawBurst(canvas, size, groundY, s);
     _drawFlash(canvas, size, s);
@@ -260,53 +276,86 @@ class ReefPainter extends CustomPainter {
 
   // ---------------------------------------------------------------- cahaya
 
-  void _drawCaustics(Canvas canvas, Size size, ReefVisualState s) {
+  /// Caustics hanya menempel TEPAT di bentuk karang dan pasir: siluet asli
+  /// dirender ke layer lalu pola cahaya dipotong dengan BlendMode.dstIn.
+  void _drawCaustics(
+    Canvas canvas,
+    Size size,
+    double groundY,
+    ReefVisualState s,
+  ) {
     final program = s.causticsProgram;
+    // Fallback pita: layer dibatasi alpha global; shader sudah modulasi
+    // alpha per-piksel lewat dstIn.
+    _layer.color = program == null
+        ? Colors.white.withValues(alpha: 0.3 * _vitality)
+        : const Color(0xFFFFFFFF);
+    canvas.saveLayer(Offset.zero & size, _layer);
+    _silhouette = true;
+    _drawSeabed(canvas, size, s);
+    _drawCorals(canvas, size, groundY, s);
+    _silhouette = false;
     if (program != null) {
       final shader = _shader ??= program.fragmentShader();
       shader
         ..setFloat(0, size.width)
         ..setFloat(1, size.height)
         ..setFloat(2, s.time)
-        ..setFloat(3, 0.35 * _vitality);
-      _stroke
+        ..setFloat(3, 0.55 * _vitality);
+      _fill
         ..shader = shader
-        ..blendMode = BlendMode.screen;
-      canvas.drawRect(Offset.zero & size, _stroke);
-      _stroke
+        ..blendMode = BlendMode.dstIn;
+      canvas.drawRect(Offset.zero & size, _fill);
+      _fill
         ..shader = null
         ..blendMode = BlendMode.srcOver;
-      return;
+    } else {
+      _drawCausticsFallback(canvas, size, s);
     }
-    _drawCausticsFallback(canvas, size, s);
+    canvas.restore();
   }
 
   /// Fallback dua lapis pita cahaya bergeser berlawanan (item 3 Unit B).
+  /// dstIn hanya menyentuh piksel yang tercakup gambarnya, jadi pita tipis
+  /// tidak bisa menghapus siluet di luarnya. Sebagai gantinya, path even-odd
+  /// (layar penuh minus pita) di-blend dstOut: yang tersisa hanya siluet
+  /// di dalam pita, lalu di-composite lewat alpha [_layer].
   void _drawCausticsFallback(Canvas canvas, Size size, ReefVisualState s) {
-    final alpha = 0.06 * _vitality;
+    const bandHalf = 7.0;
+    final steps = (size.width / 40).ceil();
+    _maskPath
+      ..reset()
+      ..fillType = PathFillType.evenOdd
+      ..addRect(Offset.zero & size);
     for (var layer = 0; layer < 2; layer++) {
       final dir = layer == 0 ? 1.0 : -1.0;
       final drift = s.time * 0.35 * dir + layer * 2.1;
       for (var band = 0; band < 4; band++) {
-        final baseY = size.height * (0.08 + 0.16 * band) + layer * 14;
-        _path
-          ..reset()
-          ..moveTo(0, baseY);
-        for (var x = 20.0; x <= size.width; x += 40) {
-          _path.quadraticBezierTo(
-            x - 20,
-            baseY + math.sin(x * 0.02 + drift + band) * 14,
+        final baseY = size.height * (0.42 + 0.14 * band) + layer * 10;
+        final phase = drift + band;
+        _maskPath.moveTo(0, baseY + math.sin(phase) * 14 - bandHalf);
+        for (var i = 1; i <= steps; i++) {
+          final x = i * 40.0;
+          _maskPath.lineTo(
             x,
-            baseY + math.sin((x + 20) * 0.02 + drift + band) * 14,
+            baseY + math.sin(x * 0.02 + phase) * 14 - bandHalf,
           );
         }
-        // Pita tipis: garis tebal, bukan area terisi.
-        _stroke
-          ..color = Colors.white.withValues(alpha: alpha)
-          ..strokeWidth = 7;
-        canvas.drawPath(_path, _stroke);
+        for (var i = steps; i >= 0; i--) {
+          final x = i * 40.0;
+          _maskPath.lineTo(
+            x,
+            baseY + math.sin(x * 0.02 + phase) * 14 + bandHalf,
+          );
+        }
+        _maskPath.close();
       }
     }
+    _fill
+      ..color = _silhouetteColor
+      ..blendMode = BlendMode.dstOut;
+    canvas.drawPath(_maskPath, _fill);
+    _fill.blendMode = BlendMode.srcOver;
   }
 
   void _drawLightRays(Canvas canvas, Size size, ReefVisualState s) {
@@ -318,10 +367,12 @@ class ReefPainter extends CustomPainter {
         ..reset()
         ..moveTo(top - 7, 0)
         ..lineTo(top + 7, 0)
-        ..lineTo(bottom + 34, size.height * 0.82)
-        ..lineTo(bottom - 34, size.height * 0.82)
+        ..lineTo(bottom + 46, size.height)
+        ..lineTo(bottom - 46, size.height)
         ..close();
-      _fill.color = Colors.white.withValues(alpha: 0.05 * _vitality);
+      _fill.color = Colors.white.withValues(
+        alpha: (0.05 + 0.025 * math.sin(s.time * 0.17 + i * 1.9)) * _vitality,
+      );
       canvas.drawPath(_path, _fill);
     }
   }
@@ -345,12 +396,13 @@ class ReefPainter extends CustomPainter {
       ..lineTo(size.width, size.height)
       ..lineTo(0, size.height)
       ..close();
-    _fill.color = const Color(0x73FFE0B2);
+    _fill.color = _silhouette ? _silhouetteColor : const Color(0x73FFE0B2);
     canvas.drawPath(_path, _fill);
     for (final rock in s.layout.rocks) {
       final cx = rock.x * size.width;
-      _fill.color = const Color(0xFF33566A)
-          .withValues(alpha: 0.55 + 0.25 * _vitality);
+      _fill.color = _silhouette
+          ? _silhouetteColor
+          : const Color(0xFF33566A).withValues(alpha: 0.55 + 0.25 * _vitality);
       canvas.drawOval(
         Rect.fromCenter(
           center: Offset(cx, top + 6),
@@ -385,8 +437,12 @@ class ReefPainter extends CustomPainter {
         // Karang terbaru (indeks terakhir) "tumbuh" saat pop < 1.
         final popScale = i == corals.length - 1 ? _easeOut(s.pop) : 1.0;
         final factor = scale * popScale;
-        final color = _color(spec.colorIndex, s);
-        final detail = _detailColor(spec.colorIndex, s);
+        final color = _silhouette
+            ? _silhouetteColor
+            : _color(spec.colorIndex, s);
+        final detail = _silhouette
+            ? _silhouetteColor
+            : _detailColor(spec.colorIndex, s);
         final base = Offset(
           size.width * 0.05 + spec.x * size.width * 0.9,
           groundY + 6,

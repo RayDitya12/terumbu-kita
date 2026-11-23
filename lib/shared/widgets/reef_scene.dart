@@ -5,17 +5,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/game_rules.dart';
+import '../../core/constants/visual_config.dart';
 import '../../core/providers.dart';
 import '../../core/utils/game_logic.dart';
 import '../../data/models/app_settings.dart';
 import 'reef_painter.dart';
 
-/// Scene terumbu hidup untuk Home (Unit B).
+/// Scene terumbu hidup untuk Home.
 ///
 /// Satu [AnimationController] menggerakkan semua animasi ambient; painter
 /// tidak pernah dibuat ulang per frame (item kinerja 7). Animasi berhenti
 /// saat tab lain aktif (IndexedStack men-mute Ticker), aplikasi di
-/// background, atau pengguna memilih "Hemat"/nonaktifkan animasi sistem.
+/// background, atau pada mode Minimal. `MediaQuery.disableAnimations`
+/// diperlakukan seperti Minimal penuh (tanpa feedback gerak).
 ///
 /// CD4/CD6: mencatat aksi memicu burst gelembung + karang baru tumbuh
 /// (scale-in) + haptic — umpan balik instan bahwa dunia bereaksi.
@@ -28,7 +30,6 @@ class ReefScene extends ConsumerStatefulWidget {
 
 class _ReefSceneState extends ConsumerState<ReefScene>
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
-  static const _loopSeconds = 120.0;
   static const _shaderAsset = 'assets/shaders/caustics.frag';
 
   late final AnimationController _controller;
@@ -54,11 +55,16 @@ class _ReefSceneState extends ConsumerState<ReefScene>
   void initState() {
     super.initState();
     _visual = ReefVisualState(
-      layout: ReefLayout.build(stage: ReefStage.tunas, bubbleCount: 26),
+      layout: ReefLayout.build(
+        stage: ReefStage.tunas,
+        bubbleCount: VisualConfig.bubblesFor(EffectQuality.full),
+      ),
     );
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 120),
+      duration: Duration(
+        milliseconds: (VisualConfig.loopSeconds * 1000).round(),
+      ),
     )..addListener(_onTick);
     _painter = ReefPainter(_visual);
     WidgetsBinding.instance.addObserver(this);
@@ -76,17 +82,18 @@ class _ReefSceneState extends ConsumerState<ReefScene>
     }
   }
 
-  ui.FragmentProgram? get _effectiveProgram => _qualityFull ? _program : null;
+  ui.FragmentProgram? get _effectiveProgram =>
+      VisualConfig.shaderFor(_quality) ? _program : null;
 
-  bool _qualityFull = true;
+  EffectQuality _quality = EffectQuality.full;
 
   void _onTick() {
-    final t = _controller.value * _loopSeconds;
+    final t = _controller.value * VisualConfig.loopSeconds;
     _visual.mutate(() {
       _visual.time = t;
-      _visual.burst = (t - _burstStart) / 1.4;
-      _visual.pop = (t - _popStart) / 0.9;
-      _visual.flash = (t - _flashStart) / 0.9;
+      _visual.burst = (t - _burstStart) / VisualConfig.burstSeconds;
+      _visual.pop = (t - _popStart) / VisualConfig.popSeconds;
+      _visual.flash = (t - _flashStart) / VisualConfig.flashSeconds;
     });
   }
 
@@ -106,13 +113,17 @@ class _ReefSceneState extends ConsumerState<ReefScene>
   }
 
   void _syncController() {
-    if (_motionAllowed && !_pausedByLifecycle) {
+    final ambient =
+        _motionAllowed &&
+        !_pausedByLifecycle &&
+        _quality != EffectQuality.minimal;
+    if (ambient) {
       _controller.repeat();
     } else {
       _controller.stop();
       // Render satu frame statis agar terumbu tetap tampil utuh.
       _visual.mutate(() {
-        _visual.time = 12.0;
+        _visual.time = VisualConfig.staticFrameSeconds;
         _visual.burst = 1;
         _visual.pop = 1;
         _visual.flash = 1;
@@ -121,10 +132,30 @@ class _ReefSceneState extends ConsumerState<ReefScene>
   }
 
   void _handleActionLogged() {
-    final t = _visual.time;
+    final minimal = _quality == EffectQuality.minimal;
+    // Minimal membeku di frame statis; feedback harus mulai dari waktu itu,
+    // bukan dari nilai controller terakhir kali ambient berhenti.
+    final t = minimal ? VisualConfig.staticFrameSeconds : _visual.time;
     _burstStart = t;
     _popStart = t;
     HapticFeedback.lightImpact();
+    if (minimal) {
+      _controller.value = t / VisualConfig.loopSeconds;
+      // Minimal: animasi hanya segaris feedback singkat lalu berhenti lagi.
+      final span =
+          VisualConfig.minimalFeedbackSeconds / VisualConfig.loopSeconds;
+      _controller
+          .animateTo(
+            _controller.value + span,
+            duration: Duration(
+              milliseconds: (VisualConfig.minimalFeedbackSeconds * 1000)
+                  .round(),
+            ),
+          )
+          .then((_) {
+            if (mounted) _syncController();
+          });
+    }
   }
 
   @override
@@ -141,11 +172,17 @@ class _ReefSceneState extends ConsumerState<ReefScene>
     final progress = ref.watch(progressProvider);
     final stage = reefStageFor(progress.totalActions);
     final growth = reefGrowthFraction(progress.totalActions);
-    final qualityFull = settings.effectQuality == EffectQuality.full;
-    _qualityFull = qualityFull;
+    // disableAnimations sistem diperlakukan seperti Minimal penuh.
+    final effectiveQuality = _motionAllowed
+        ? settings.effectQuality
+        : EffectQuality.minimal;
+    if (effectiveQuality != _quality) {
+      _quality = effectiveQuality;
+      _syncController();
+    }
 
     // Susunan karang hanya dibangun ulang saat tahap/jumlah gelembung berubah.
-    final bubbleTarget = _bubbleTarget(progress.reefHealth, qualityFull);
+    final bubbleTarget = _bubbleTarget(progress.reefHealth, _quality);
     if (stage != _layoutStage || bubbleTarget != _layoutBubbles) {
       _layoutStage = stage;
       _layoutBubbles = bubbleTarget;
@@ -160,7 +197,10 @@ class _ReefSceneState extends ConsumerState<ReefScene>
       }
       eventsChanged = true;
     }
-    if (_lastLevel >= 0 && progress.level > _lastLevel && _motionAllowed) {
+    if (_lastLevel >= 0 &&
+        progress.level > _lastLevel &&
+        _motionAllowed &&
+        _quality != EffectQuality.minimal) {
       _flashStart = _visual.time;
       eventsChanged = true;
     }
@@ -172,10 +212,14 @@ class _ReefSceneState extends ConsumerState<ReefScene>
       _visual.growth = growth;
       _visual.layout = _layout!;
       _visual.causticsProgram = _effectiveProgram;
+      _visual.showCaustics = VisualConfig.causticsFor(_quality);
+      _visual.showRays = VisualConfig.raysFor(_quality);
       if (eventsChanged) {
-        _visual.burst = (_visual.time - _burstStart) / 1.4;
-        _visual.pop = (_visual.time - _popStart) / 0.9;
-        _visual.flash = (_visual.time - _flashStart) / 0.9;
+        _visual.burst =
+            (_visual.time - _burstStart) / VisualConfig.burstSeconds;
+        _visual.pop = (_visual.time - _popStart) / VisualConfig.popSeconds;
+        _visual.flash =
+            (_visual.time - _flashStart) / VisualConfig.flashSeconds;
       }
     });
 
@@ -184,9 +228,10 @@ class _ReefSceneState extends ConsumerState<ReefScene>
     );
   }
 
-  /// Hemat = separuh gelembung; karang memudar = lebih sedikit gelembung.
-  int _bubbleTarget(int health, bool qualityFull) {
-    final base = qualityFull ? 26 : 13;
+  /// Jumlah gelembung per mode, lalu dikurangi saat karang memudar.
+  int _bubbleTarget(int health, EffectQuality quality) {
+    final base = VisualConfig.bubblesFor(quality);
+    if (base == 0) return 0;
     final vitality = 0.6 + 0.4 * (health / 100).clamp(0.0, 1.0);
     return (base * vitality).round();
   }

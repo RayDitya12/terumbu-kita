@@ -1,10 +1,12 @@
 import 'json_utils.dart';
 
-/// Kualitas efek visual terumbu (Unit B): Penuh = shader caustics +
-/// 26 gelembung; Hemat = fallback pita cahaya + separuh gelembung.
+/// Kualitas efek visual terumbu: Penuh = shader caustics + gelembung penuh
+/// berparallax + light rays; Hemat = fallback pita cahaya, separuh gelembung,
+/// tanpa light rays; Minimal = terumbu statis, animasi hanya feedback aksi.
 enum EffectQuality {
   full,
-  hemat;
+  hemat,
+  minimal;
 
   static EffectQuality fromName(String name) => EffectQuality.values.firstWhere(
     (q) => q.name == name,
