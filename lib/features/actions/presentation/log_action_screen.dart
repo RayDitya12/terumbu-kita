@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/game_rules.dart';
 import '../../../core/constants/impact_constants.dart';
 import '../../../core/providers.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/game_logic.dart';
@@ -96,7 +99,7 @@ class _LogActionScreenState extends ConsumerState<LogActionScreen> {
     final allDone = doneTypes.length >= ActionType.values.length;
     final canCancel = ref.read(progressProvider.notifier).canCancelLastAction;
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.homeLogAction)),
+      appBar: SeaAppBar(title: AppStrings.homeLogAction),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -159,7 +162,7 @@ class _LogActionScreenState extends ConsumerState<LogActionScreen> {
                     AppStrings.logActionAllDone,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.reefGradientBottom,
+                      color: AppColors.teal,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -168,8 +171,8 @@ class _LogActionScreenState extends ConsumerState<LogActionScreen> {
                 icon: const Icon(Icons.check_circle_outline),
                 label: const Text(AppStrings.logActionSubmit),
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppTheme.coralAccent,
-                  foregroundColor: Colors.black87,
+                  backgroundColor: AppColors.coral,
+                  foregroundColor: AppColors.ink,
                   minimumSize: const Size(0, 56),
                 ),
                 onPressed:
@@ -230,7 +233,7 @@ class _ActionCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: showSelected
-            ? const BorderSide(color: AppTheme.coralAccent, width: 3)
+            ? BorderSide(color: AppTheme.coralText(theme.brightness), width: 3)
             : BorderSide.none,
       ),
       child: InkWell(
@@ -243,19 +246,22 @@ class _ActionCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (recommended && !done)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(bottom: 4),
                   child: Text(
                     AppStrings.logActionRecommended,
-                    style: TextStyle(fontSize: 10, color: AppTheme.coralAccent),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: AppTheme.coralText(theme.brightness),
+                    ),
                   ),
                 ),
               Icon(
                 done ? Icons.check_circle : icon,
                 color: done
-                    ? AppTheme.reefGradientBottom
+                    ? AppColors.teal
                     : selected
-                    ? AppTheme.coralAccent
+                    ? AppTheme.coralText(theme.brightness)
                     : null,
               ),
               const SizedBox(height: 6),
@@ -270,7 +276,7 @@ class _ActionCard extends StatelessWidget {
               Text(
                 done ? AppStrings.logActionDoneToday : '+${type.xp} XP',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: done ? AppTheme.reefGradientBottom : null,
+                  color: done ? AppColors.teal : null,
                   fontWeight: done ? FontWeight.w700 : null,
                 ),
               ),
@@ -308,7 +314,7 @@ class _WinStateSheet extends StatelessWidget {
               child: Icon(
                 outcome.firstAction ? Icons.eco : Icons.waves,
                 size: 64,
-                color: AppTheme.coralAccent,
+                color: AppTheme.coralText(theme.brightness),
               ),
             ),
             const SizedBox(height: 12),
@@ -346,7 +352,7 @@ class _WinStateSheet extends StatelessWidget {
                 line,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.healthWarn,
+                  color: AppTheme.amberText(theme.brightness),
                   fontWeight: FontWeight.w700,
                 ),
               ),

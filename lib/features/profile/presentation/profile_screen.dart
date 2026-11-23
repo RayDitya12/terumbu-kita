@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/game_logic.dart';
 import '../../../data/models/app_settings.dart';
 
@@ -40,7 +42,7 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.profileScreenTitle)),
+      appBar: SeaAppBar(title: AppStrings.profileScreenTitle),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -48,10 +50,10 @@ class ProfileScreen extends ConsumerWidget {
             child: ListTile(
               leading: CircleAvatar(
                 radius: 28,
-                backgroundColor: AppTheme.reefGradientBottom,
+                backgroundColor: AppColors.teal,
                 child: Text(
                   (profile?.nickname ?? '?').characters.first,
-                  style: const TextStyle(color: Colors.white, fontSize: 24),
+                  style: const TextStyle(color: AppColors.foam, fontSize: 24),
                 ),
               ),
               title: Text(
@@ -155,7 +157,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           Card(
-            color: AppTheme.amberTint,
+            color: AppColors.amberTint,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -163,25 +165,33 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.science_outlined, color: AppTheme.amberInk),
+                      const Icon(
+                        Icons.science_outlined,
+                        color: AppColors.amberInk,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         AppStrings.demoModeTitle,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
+                          color: AppColors.ink,
                         ),
                       ),
                     ],
                   ),
                   Text(
                     AppStrings.demoModeSubtitle,
-                    style: theme.textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.ink,
+                    ),
                   ),
                   Text(
                     '${AppStrings.demoOffsetLabel}'
                     '${settings.simulatedDateOffsetDays}'
                     '${AppStrings.demoOffsetDays}',
-                    style: theme.textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.ink,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
@@ -212,7 +222,8 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       FilledButton(
                         style: FilledButton.styleFrom(
-                          backgroundColor: AppTheme.healthWarn,
+                          backgroundColor: AppColors.sunYellow,
+                          foregroundColor: AppColors.ink,
                         ),
                         onPressed: () async {
                           await ref.read(progressProvider.notifier).resetAll();

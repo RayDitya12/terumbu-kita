@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/game_rules.dart';
 import '../../../core/providers.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/chest.dart';
 import '../../../core/utils/clock.dart';
@@ -79,7 +82,7 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
         (chestToday == null || Clock.dateOnly(chestToday) != today);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.questTitle)),
+      appBar: SeaAppBar(title: AppStrings.questTitle),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -95,9 +98,9 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.card_giftcard,
-                        color: AppTheme.coralAccent,
+                        color: AppTheme.coralText(theme.brightness),
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -134,9 +137,11 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
           const SizedBox(height: 12),
           // CD6: event musiman (banner simulasi) + pintu mini-game (CD7).
           Card(
-            color: AppTheme.coralTint,
+            color: AppColors.coralTint,
             child: ListTile(
-              iconColor: AppTheme.coralAccent,
+              // Latar tint selalu terang, jadi teks & ikon pakai tinta gelap.
+              textColor: AppColors.ink,
+              iconColor: AppColors.coralInk,
               leading: const Icon(Icons.local_activity),
               title: const Text(AppStrings.eventTitle),
               subtitle: const Text(AppStrings.eventBody),

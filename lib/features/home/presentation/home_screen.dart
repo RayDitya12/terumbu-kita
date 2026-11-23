@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/game_rules.dart';
 import '../../../core/providers.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/game_logic.dart';
@@ -48,7 +50,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           title: Row(
             children: [
-              const Icon(Icons.waves, color: AppTheme.coralAccent),
+              const Icon(Icons.waves, color: AppColors.coral),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -82,51 +84,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         .fold<double>(0, (sum, log) => sum + log.plasticGrams);
     final stage = reefStageFor(progress.totalActions);
 
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const DecoratedBox(
-            decoration: BoxDecoration(gradient: reefBackgroundGradient),
-          ),
-          // Area terumbu: dari bawah judul sampai tepat di atas kartu ringkasan.
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 268,
-            top: MediaQuery.sizeOf(context).height * 0.16,
-            child: const ReefScene(),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _HeaderRow(profile: profile, stage: stage),
-                  const Spacer(),
-                  _ReefSummaryCard(
-                    progress: progress,
-                    totalGrams: totalGrams,
-                    theme: theme,
-                  ),
-                  const SizedBox(height: 12),
-                  // Tombol jempol paling bawah: aksi utama paling dekat.
-                  FilledButton.icon(
-                    icon: const Icon(Icons.add_circle_outline),
-                    label: const Text(AppStrings.homeLogAction),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.coralAccent,
-                      foregroundColor: Colors.black87,
-                      minimumSize: const Size(0, 60),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // Scene Home gelap; AppBar layar lain mengatur dirinya sendiri.
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            const DecoratedBox(
+              decoration: BoxDecoration(gradient: reefBackgroundGradient),
+            ),
+            // Area terumbu: dari bawah judul sampai tepat di atas kartu ringkasan.
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 268,
+              top: MediaQuery.sizeOf(context).height * 0.16,
+              child: const ReefScene(),
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _HeaderRow(profile: profile, stage: stage),
+                    const Spacer(),
+                    _ReefSummaryCard(
+                      progress: progress,
+                      totalGrams: totalGrams,
+                      theme: theme,
                     ),
-                    onPressed: () => context.push('/log-action'),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    // Tombol jempol paling bawah: aksi utama paling dekat.
+                    FilledButton.icon(
+                      icon: const Icon(Icons.add_circle_outline),
+                      label: const Text(AppStrings.homeLogAction),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.coral,
+                        foregroundColor: AppColors.ink,
+                        minimumSize: const Size(0, 60),
+                      ),
+                      onPressed: () => context.push('/log-action'),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -147,7 +153,7 @@ class _HeaderRow extends StatelessWidget {
           child: Text(
             '${AppStrings.homeGreetingPrefix} ${profile?.nickname ?? ''}',
             style: theme.textTheme.titleLarge?.copyWith(
-              color: Colors.white,
+              color: AppColors.foam,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -155,13 +161,13 @@ class _HeaderRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.16),
+            color: AppColors.foam.withValues(alpha: 0.16),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             AppStrings.reefStageNames[stage.name]!,
             style: theme.textTheme.labelLarge?.copyWith(
-              color: Colors.white,
+              color: AppColors.foam,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -226,7 +232,7 @@ class _ReefSummaryCard extends StatelessWidget {
                       ? Icons.local_fire_department
                       : Icons.local_fire_department_outlined,
                   size: 18,
-                  color: AppTheme.healthWarn,
+                  color: AppColors.sunYellow,
                 ),
                 const SizedBox(width: 6),
                 Text(

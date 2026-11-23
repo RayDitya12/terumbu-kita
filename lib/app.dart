@@ -114,8 +114,9 @@ class TerumbuApp extends ConsumerWidget {
     return MaterialApp.router(
       title: AppStrings.appName,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      // Varian tema dikontrol satu konstanta (unit tema); tidak ikut
+      // preferensi sistem agar QA deterministik.
+      theme: AppTheme.forVariant(kTerumbuThemeVariant),
       routerConfig: ref.watch(routerProvider),
     );
   }

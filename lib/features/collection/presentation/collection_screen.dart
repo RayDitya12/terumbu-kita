@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 
 /// Koleksi pengguna (spec.md §6.1 layar 8): spesies, dekorasi, badge.
@@ -18,7 +21,7 @@ class CollectionScreen extends ConsumerWidget {
     final collection = ref.watch(collectionProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.collectionTitle)),
+      appBar: SeaAppBar(title: AppStrings.collectionTitle),
       body: species.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(child: Text(AppStrings.impactNoData)),
@@ -57,9 +60,9 @@ class CollectionScreen extends ConsumerWidget {
               children: [
                 for (final id in collection.badges)
                   Chip(
-                    avatar: const Icon(
+                    avatar: Icon(
                       Icons.workspace_premium,
-                      color: AppTheme.coralAccent,
+                      color: AppTheme.coralText(theme.brightness),
                     ),
                     label: Text(AppStrings.badgeNames[id] ?? id),
                   ),
@@ -109,7 +112,7 @@ class _SpeciesTile extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: unlocked
-            ? AppTheme.coralAccent.withValues(alpha: 0.12)
+            ? AppColors.coralTint
             : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -118,18 +121,22 @@ class _SpeciesTile extends StatelessWidget {
         children: [
           Icon(
             unlocked ? Icons.eco : Icons.lock_outline,
-            color: unlocked ? AppTheme.reefGradientBottom : null,
+            color: unlocked ? AppColors.teal : null,
           ),
           const SizedBox(height: 6),
           Text(
             name,
+            // Latar ubin terbuka selalu coralTint terang, jadi tinta gelap.
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w700,
+              color: unlocked ? AppColors.ink : null,
             ),
           ),
           Text(
             unlocked ? rarity : '${AppStrings.collectionLocked} · $hint',
-            style: theme.textTheme.labelSmall,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: unlocked ? AppColors.ink : null,
+            ),
           ),
         ],
       ),

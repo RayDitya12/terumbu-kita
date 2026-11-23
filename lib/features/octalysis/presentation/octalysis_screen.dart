@@ -2,7 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_strings.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../shared/widgets/sea_app_bar.dart';
 
 /// Target radar per Core Drive (spec.md §4.2 — angka desain, bukan hasil
 /// ukur). Layar opsional untuk pitch (spec.md §6.1 layar 12).
@@ -27,7 +28,7 @@ class OctalysisScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.octalysisTitle)),
+      appBar: SeaAppBar(title: AppStrings.octalysisTitle),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -43,10 +44,8 @@ class OctalysisScreen extends StatelessWidget {
                     dataEntries: [
                       for (final v in _values) RadarEntry(value: v),
                     ],
-                    fillColor: AppTheme.reefGradientBottom.withValues(
-                      alpha: 0.35,
-                    ),
-                    borderColor: AppTheme.reefGradientBottom,
+                    fillColor: AppColors.teal.withValues(alpha: 0.35),
+                    borderColor: AppColors.teal,
                     entryRadius: 4,
                   ),
                 ],

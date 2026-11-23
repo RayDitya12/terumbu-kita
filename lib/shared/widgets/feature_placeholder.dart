@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'sea_app_bar.dart';
+
 /// Layar sementara sampai fiturnya dibangun di tahap berikutnya (spec.md §12).
 class FeaturePlaceholder extends StatelessWidget {
   const FeaturePlaceholder({
@@ -15,7 +17,7 @@ class FeaturePlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: SeaAppBar(title: title),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),

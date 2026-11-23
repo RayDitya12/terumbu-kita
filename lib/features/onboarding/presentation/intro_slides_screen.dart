@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_strings.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 
 /// 2–3 slide intro singkat sebelum Glowing Choice (spec.md §6.1 layar 2).
 /// Sengaja pendek: tidak ada formulir, satu jalur maju (CD3, agent.md §3).
@@ -75,7 +75,7 @@ class _IntroSlidesScreenState extends State<IntroSlidesScreen> {
                     height: 8,
                     decoration: BoxDecoration(
                       color: i == _page
-                          ? AppTheme.coralAccent
+                          ? AppColors.coral
                           : theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(4),
                     ),

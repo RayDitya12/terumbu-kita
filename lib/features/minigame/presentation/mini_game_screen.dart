@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 
 /// Barang untuk mini-game Pilah Cepat (spec.md §6.1 layar 6).
@@ -94,8 +97,8 @@ class _MiniGameScreenState extends ConsumerState<MiniGameScreen> {
     final theme = Theme.of(context);
     final done = _finished;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.miniGameTitle),
+      appBar: SeaAppBar(
+        title: AppStrings.miniGameTitle,
         actions: [
           Center(
             child: Padding(
@@ -114,10 +117,10 @@ class _MiniGameScreenState extends ConsumerState<MiniGameScreen> {
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.emoji_events,
                     size: 72,
-                    color: AppTheme.coralAccent,
+                    color: AppTheme.coralText(theme.brightness),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -166,7 +169,8 @@ class _MiniGameScreenState extends ConsumerState<MiniGameScreen> {
                         child: FilledButton(
                           key: const Key('answer-once'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppTheme.healthWarn,
+                            backgroundColor: AppColors.sunYellow,
+                            foregroundColor: AppColors.ink,
                             minimumSize: const Size(0, 64),
                           ),
                           onPressed: () => _answer(false),
@@ -178,7 +182,8 @@ class _MiniGameScreenState extends ConsumerState<MiniGameScreen> {
                         child: FilledButton(
                           key: const Key('answer-reuse'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppTheme.reefGradientBottom,
+                            backgroundColor: AppColors.teal,
+                            foregroundColor: AppColors.foam,
                             minimumSize: const Size(0, 64),
                           ),
                           onPressed: () => _answer(true),

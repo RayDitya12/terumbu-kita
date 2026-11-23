@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../shared/widgets/sea_app_bar.dart';
+
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
@@ -17,7 +19,7 @@ class RewardsScreen extends ConsumerWidget {
     final rewards = ref.watch(rewardsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.rewardsTitle)),
+      appBar: SeaAppBar(title: AppStrings.rewardsTitle),
       body: rewards.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(child: Text(AppStrings.impactNoData)),
@@ -33,9 +35,9 @@ class RewardsScreen extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.confirmation_number,
-                            color: AppTheme.coralAccent,
+                            color: AppTheme.coralText(theme.brightness),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
