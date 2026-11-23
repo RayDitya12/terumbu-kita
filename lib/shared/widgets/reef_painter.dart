@@ -212,6 +212,7 @@ class ReefPainter extends CustomPainter {
   final Path _path = Path();
   ui.FragmentShader? _shader;
   List<Color>? _bleachedPalette;
+  List<Color>? _detailPalette;
   int _bleachedForHealth = -1;
 
   @override
@@ -228,15 +229,31 @@ class ReefPainter extends CustomPainter {
   }
 
   Color _color(int index, ReefVisualState s) {
+    _ensurePalettes(s);
+    return _bleachedPalette![index % _bleachedPalette!.length];
+  }
+
+  /// Warna aksen (polip, alur, pita) yang tetap terlihat saat karang
+  /// memutih — bleaching asli masih menampilkan struktur keabuan.
+  Color _detailColor(int index, ReefVisualState s) {
+    _ensurePalettes(s);
+    return _detailPalette![index % _detailPalette!.length];
+  }
+
+  void _ensurePalettes(ReefVisualState s) {
     final health = s.health;
     if (_bleachedForHealth != health) {
-      final bleaching = ((100 - health).clamp(0, 100)) / 100.0;
+      // Cap 0.8: tubuh karang tidak pernah jadi putih datar 100%.
+      final bleaching = math.min(0.8, (100 - health).clamp(0, 100) / 100.0);
       _bleachedPalette = [
         for (final c in palette) ui.Color.lerp(c, Colors.white, bleaching)!,
       ];
+      _detailPalette = [
+        for (final c in _bleachedPalette!)
+          ui.Color.lerp(c, const Color(0xFF54707F), 0.45)!,
+      ];
       _bleachedForHealth = health;
     }
-    return _bleachedPalette![index % _bleachedPalette!.length];
   }
 
   double get _vitality => (state.health / 100).clamp(0.15, 1.0);
@@ -365,6 +382,7 @@ class ReefPainter extends CustomPainter {
         final popScale = i == corals.length - 1 ? _easeOut(s.pop) : 1.0;
         final factor = scale * popScale;
         final color = _color(spec.colorIndex, s);
+        final detail = _detailColor(spec.colorIndex, s);
         final base = Offset(
           size.width * 0.05 + spec.x * size.width * 0.9,
           groundY + 6,
@@ -372,15 +390,15 @@ class ReefPainter extends CustomPainter {
         final height = areaHeight * spec.height * factor;
         switch (spec.species) {
           case CoralSpecies.branching:
-            _drawBranching(canvas, base, height, color, spec, s);
+            _drawBranching(canvas, base, height, color, detail, spec, s);
           case CoralSpecies.seaweed:
-            _drawSeaweed(canvas, base, height, color, spec, s);
+            _drawSeaweed(canvas, base, height, color, detail, spec, s);
           case CoralSpecies.table:
-            _drawTable(canvas, base, height, color, spec);
+            _drawTable(canvas, base, height, color, detail, spec);
           case CoralSpecies.brain:
-            _drawBrain(canvas, base, height, color, spec);
+            _drawBrain(canvas, base, height, color, detail, spec);
           case CoralSpecies.seaFan:
-            _drawSeaFan(canvas, base, height, color, spec);
+            _drawSeaFan(canvas, base, height, color, detail, spec);
         }
       }
     }
@@ -391,6 +409,7 @@ class ReefPainter extends CustomPainter {
     Offset base,
     double height,
     Color color,
+    Color detail,
     CoralSpec spec,
     ReefVisualState s,
   ) {
@@ -406,6 +425,7 @@ class ReefPainter extends CustomPainter {
       depthRemaining: 3,
       rng: rng,
       polyps: 1 + (s.growth * 2).round(),
+      detail: detail,
     );
   }
 
@@ -417,6 +437,7 @@ class ReefPainter extends CustomPainter {
     required int depthRemaining,
     required math.Random rng,
     required int polyps,
+    required Color detail,
   }) {
     _stroke.strokeWidth = 2.5 + depthRemaining * 3.0;
     final end = start + Offset(math.cos(angle), math.sin(angle)) * length;
@@ -435,6 +456,7 @@ class ReefPainter extends CustomPainter {
       final tip = 4 + _stroke.strokeWidth * 0.55;
       canvas.drawCircle(end, tip, _fill);
       // CD4: polip tambahan muncul saat growth naik dalam tahap.
+      _fill.color = detail;
       for (var p = 0; p < polyps; p++) {
         final a = rng.nextDouble() * _tau;
         final d = tip + 3 + rng.nextDouble() * 4;
@@ -455,6 +477,7 @@ class ReefPainter extends CustomPainter {
         depthRemaining: depthRemaining - 1,
         rng: rng,
         polyps: polyps,
+        detail: detail,
       );
     }
   }
@@ -464,14 +487,15 @@ class ReefPainter extends CustomPainter {
     Offset base,
     double height,
     Color color,
+    Color detail,
     CoralSpec spec,
     ReefVisualState s,
   ) {
     _stroke
-      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5;
     for (var ribbon = 0; ribbon < 3; ribbon++) {
+      _stroke.color = ribbon == 1 ? detail : color;
       final offset = (ribbon - 1) * 6.0;
       final sway = math.sin(s.time * 1.1 + spec.phase + ribbon) * 10;
       _path
@@ -495,6 +519,7 @@ class ReefPainter extends CustomPainter {
     Offset base,
     double height,
     Color color,
+    Color detail,
     CoralSpec spec,
   ) {
     final top = base - Offset(0, height);
@@ -514,7 +539,7 @@ class ReefPainter extends CustomPainter {
       _fill,
     );
     _stroke
-      ..color = ui.Color.lerp(color, Colors.black, 0.25)!
+      ..color = detail
       ..strokeWidth = 3;
     canvas.drawOval(
       Rect.fromCenter(center: top, width: width, height: width * 0.22),
@@ -536,6 +561,7 @@ class ReefPainter extends CustomPainter {
     Offset base,
     double height,
     Color color,
+    Color detail,
     CoralSpec spec,
   ) {
     final mound = Rect.fromCenter(
@@ -547,7 +573,7 @@ class ReefPainter extends CustomPainter {
     canvas.drawOval(mound, _fill);
     // Alur berkelok: empat pita horizontal, terpotong sesuai lebar oval.
     _stroke
-      ..color = ui.Color.lerp(color, Colors.black, 0.3)!
+      ..color = detail
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.4;
     final rng = math.Random(spec.seed.toInt());
@@ -577,6 +603,7 @@ class ReefPainter extends CustomPainter {
     Offset base,
     double height,
     Color color,
+    Color detail,
     CoralSpec spec,
   ) {
     _stroke
@@ -601,7 +628,9 @@ class ReefPainter extends CustomPainter {
       canvas.drawPath(_path, _stroke);
     }
     // Hubungan antar-ribs (jaring).
-    _stroke.strokeWidth = 1.6;
+    _stroke
+      ..color = detail
+      ..strokeWidth = 1.6;
     for (final level in [0.45, 0.7]) {
       _path.reset();
       for (var i = 0; i < ribs; i++) {
