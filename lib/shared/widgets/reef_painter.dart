@@ -219,11 +219,13 @@ class ReefPainter extends CustomPainter {
     ..style = PaintingStyle.stroke;
   final Paint _fill = Paint()..style = PaintingStyle.fill;
   final Path _path = Path();
-  final Path _mask = Path();
+  final Paint _layer = Paint();
+  bool _silhouette = false;
   ui.FragmentShader? _shader;
   List<Color>? _bleachedPalette;
   List<Color>? _detailPalette;
   int _bleachedForHealth = -1;
+  static const _silhouetteColor = Color(0xFFFFFFFF);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -232,8 +234,8 @@ class ReefPainter extends CustomPainter {
     if (s.showRays) _drawLightRays(canvas, size, s);
     _drawSeabed(canvas, size, s);
     _drawCorals(canvas, size, groundY, s);
-    // Caustics setelah karang: cahaya bermain DI ATAS terumbu dan pasir,
-    // bukan melayang di air terbuka (mask _reefMask).
+    // Caustics setelah karang: pola cahaya dipotong tepat pada siluet
+    // karang + pasir (layer dstIn), bukan aura di sekitarnya.
     if (s.showCaustics) _drawCaustics(canvas, size, groundY, s);
     _drawBubbles(canvas, size, groundY, s);
     _drawBurst(canvas, size, groundY, s);
@@ -272,16 +274,19 @@ class ReefPainter extends CustomPainter {
 
   // ---------------------------------------------------------------- cahaya
 
-  /// Caustics di-mask ke siluet terumbu + pasir (permintaan QA: cahaya
-  /// bermain di atas karang dan dasar, bukan di air terbuka).
+  /// Caustics hanya menempel TEPAT di bentuk karang dan pasir: siluet asli
+  /// dirender ke layer lalu pola cahaya dipotong dengan BlendMode.dstIn.
   void _drawCaustics(
     Canvas canvas,
     Size size,
     double groundY,
     ReefVisualState s,
   ) {
-    canvas.save();
-    canvas.clipPath(_reefMask(size, groundY, s));
+    canvas.saveLayer(Offset.zero & size, _layer);
+    _silhouette = true;
+    _drawSeabed(canvas, size, s);
+    _drawCorals(canvas, size, groundY, s);
+    _silhouette = false;
     final program = s.causticsProgram;
     if (program != null) {
       final shader = _shader ??= program.fragmentShader();
@@ -289,11 +294,10 @@ class ReefPainter extends CustomPainter {
         ..setFloat(0, size.width)
         ..setFloat(1, size.height)
         ..setFloat(2, s.time)
-        ..setFloat(3, 0.5 * _vitality);
-      // Pakai _fill: drawRect dengan _stroke hanya menggambar garis tepi.
+        ..setFloat(3, 0.55 * _vitality);
       _fill
         ..shader = shader
-        ..blendMode = BlendMode.screen;
+        ..blendMode = BlendMode.dstIn;
       canvas.drawRect(Offset.zero & size, _fill);
       _fill
         ..shader = null
@@ -304,52 +308,8 @@ class ReefPainter extends CustomPainter {
     canvas.restore();
   }
 
-  /// Siluet area terumbu: pasir bergelombang + batu + elips tiap karang.
-  Path _reefMask(Size size, double groundY, ReefVisualState s) {
-    _mask.reset();
-    _mask.moveTo(0, groundY + 4);
-    for (var x = 0.0; x <= size.width; x += 48) {
-      _mask.quadraticBezierTo(
-        x + 24,
-        groundY + math.sin(x * 0.02 + 1.3) * 5,
-        x + 48,
-        groundY + 4,
-      );
-    }
-    _mask
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-    for (final rock in s.layout.rocks) {
-      _mask.addOval(
-        Rect.fromCenter(
-          center: Offset(rock.x * size.width, groundY + 6),
-          width: rock.width,
-          height: rock.height,
-        ),
-      );
-    }
-    final areaHeight = size.height * 0.58;
-    final scale = 0.82 + 0.18 * s.growth;
-    final corals = s.layout.corals;
-    for (var i = 0; i < corals.length; i++) {
-      final spec = corals[i];
-      final popScale = i == corals.length - 1 ? _easeOut(s.pop) : 1.0;
-      final height = areaHeight * spec.height * scale * popScale;
-      final baseX = size.width * 0.05 + spec.x * size.width * 0.9;
-      _mask.addOval(
-        Rect.fromCenter(
-          center: Offset(baseX, groundY + 6 - height * 0.5),
-          width: height * 0.6 + 26,
-          height: height + 26,
-        ),
-      );
-    }
-    return _mask;
-  }
-
   /// Fallback dua lapis pita cahaya bergeser berlawanan (item 3 Unit B),
-  /// kini di zona terumbu karena ikut ter-mask.
+  /// ikut ter-potong oleh layer siluet saat mode Hemat.
   void _drawCausticsFallback(Canvas canvas, Size size, ReefVisualState s) {
     final alpha = 0.06 * _vitality;
     for (var layer = 0; layer < 2; layer++) {
@@ -371,10 +331,12 @@ class ReefPainter extends CustomPainter {
         // Pita tipis: garis tebal, bukan area terisi.
         _stroke
           ..color = Colors.white.withValues(alpha: alpha)
-          ..strokeWidth = 7;
+          ..strokeWidth = 7
+          ..blendMode = BlendMode.dstIn;
         canvas.drawPath(_path, _stroke);
       }
     }
+    _stroke.blendMode = BlendMode.srcOver;
   }
 
   void _drawLightRays(Canvas canvas, Size size, ReefVisualState s) {
@@ -415,12 +377,13 @@ class ReefPainter extends CustomPainter {
       ..lineTo(size.width, size.height)
       ..lineTo(0, size.height)
       ..close();
-    _fill.color = const Color(0x73FFE0B2);
+    _fill.color = _silhouette ? _silhouetteColor : const Color(0x73FFE0B2);
     canvas.drawPath(_path, _fill);
     for (final rock in s.layout.rocks) {
       final cx = rock.x * size.width;
-      _fill.color = const Color(0xFF33566A)
-          .withValues(alpha: 0.55 + 0.25 * _vitality);
+      _fill.color = _silhouette
+          ? _silhouetteColor
+          : const Color(0xFF33566A).withValues(alpha: 0.55 + 0.25 * _vitality);
       canvas.drawOval(
         Rect.fromCenter(
           center: Offset(cx, top + 6),
@@ -455,8 +418,12 @@ class ReefPainter extends CustomPainter {
         // Karang terbaru (indeks terakhir) "tumbuh" saat pop < 1.
         final popScale = i == corals.length - 1 ? _easeOut(s.pop) : 1.0;
         final factor = scale * popScale;
-        final color = _color(spec.colorIndex, s);
-        final detail = _detailColor(spec.colorIndex, s);
+        final color = _silhouette
+            ? _silhouetteColor
+            : _color(spec.colorIndex, s);
+        final detail = _silhouette
+            ? _silhouetteColor
+            : _detailColor(spec.colorIndex, s);
         final base = Offset(
           size.width * 0.05 + spec.x * size.width * 0.9,
           groundY + 6,
