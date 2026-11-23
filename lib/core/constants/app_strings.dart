@@ -226,5 +226,5 @@ abstract final class AppStrings {
   static const octalysisTitle = 'Tentang Desain Octalysis';
   static const octalysisIntro =
       'Delapan motivasi dasar (Core Drives) yang dipakai aplikasi ini, '
-      'skala 0-10 sesuai target radar spec.md §4.2.';
+      'skala 0-10 sesuai target desain tim.';
 }
