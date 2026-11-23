@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 
 /// Koleksi pengguna (spec.md §6.1 layar 8): spesies, dekorasi, badge.
 /// CD4: rasa memiliki; spesies terbuka bertahap lewat total aksi.
@@ -59,7 +59,7 @@ class CollectionScreen extends ConsumerWidget {
                   Chip(
                     avatar: const Icon(
                       Icons.workspace_premium,
-                      color: AppTheme.coralAccent,
+                      color: AppColors.coralInk,
                     ),
                     label: Text(AppStrings.badgeNames[id] ?? id),
                   ),
@@ -109,7 +109,7 @@ class _SpeciesTile extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: unlocked
-            ? AppTheme.coralAccent.withValues(alpha: 0.12)
+            ? AppColors.coralTint
             : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -118,7 +118,7 @@ class _SpeciesTile extends StatelessWidget {
         children: [
           Icon(
             unlocked ? Icons.eco : Icons.lock_outline,
-            color: unlocked ? AppTheme.reefGradientBottom : null,
+            color: unlocked ? AppColors.teal : null,
           ),
           const SizedBox(height: 6),
           Text(

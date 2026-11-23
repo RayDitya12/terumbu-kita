@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatters.dart';
 
 /// Komunitas (spec.md §6.1 layar 9) — semua data mock (spec.md §7.4).
@@ -26,7 +26,7 @@ class CommunityScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: [
             Card(
-              color: AppTheme.seaTint,
+              color: AppColors.seaTint,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -36,7 +36,7 @@ class CommunityScreen extends ConsumerWidget {
                       Formatters.grams(data.nationalCounterGrams.toDouble()),
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: AppTheme.reefGradientBottom,
+                        color: AppColors.teal,
                       ),
                     ),
                     Text(
@@ -72,7 +72,7 @@ class CommunityScreen extends ConsumerWidget {
             _SectionTitle(AppStrings.communityChallenges),
             Card(
               child: ListTile(
-                leading: const Icon(Icons.flag, color: AppTheme.coralAccent),
+                leading: const Icon(Icons.flag, color: AppColors.coralInk),
                 title: const Text(AppStrings.communityChallengeBody),
               ),
             ),

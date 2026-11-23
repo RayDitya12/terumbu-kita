@@ -1,34 +1,49 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
+
 /// Tema Material 3 terpusat bernuansa laut (spec.md §9).
-/// Jangan hardcode warna di widget — pakai colorScheme/token di sini.
+/// Semua warna bersumber dari [AppColors]; widget tidak boleh hardcode.
 abstract final class AppTheme {
-  /// Biji warna: biru laut dalam.
-  static const Color _seed = Color(0xFF0B6E8C);
-
-  /// Warna latar terumbu (dekoratif, dipakai lewat gradient).
-  static const Color reefGradientTop = Color(0xFF062A3A);
-  static const Color reefGradientBottom = Color(0xFF0E5E78);
-  static const Color coralAccent = Color(0xFFFF8A65);
-  static const Color healthWarn = Color(0xFFFFC96B);
-
-  /// Tint jenuh untuk kartu informatif (Event Musiman, kolektif, Demo Mode)
-  /// agar tidak tampak abu-abu "disabled" seperti warna alpha rendah.
-  static const Color seaTint = Color(0xFFD9EEF5);
-  static const Color coralTint = Color(0xFFFFE3D6);
-  static const Color amberTint = Color(0xFFFFF0D1);
-
-  /// Warna "tinta" di atas tint respective agar kontras cukup di latar terang.
-  static const Color amberInk = Color(0xFF8A5A00);
-
   static ThemeData light() => _base(Brightness.light);
   static ThemeData dark() => _base(Brightness.dark);
 
-  static ThemeData _base(Brightness brightness) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: _seed,
+  /// Skema warna sesuai palet: seed teal lalu override per peran.
+  /// Kontras AA: teks gelap di atas koral/kuning/sea green (lihat unit tema).
+  static ColorScheme _scheme(Brightness brightness) {
+    final seed = ColorScheme.fromSeed(
+      seedColor: AppColors.teal,
       brightness: brightness,
     );
+    if (brightness == Brightness.dark) {
+      return seed.copyWith(
+        primary: AppColors.seaGreen,
+        onPrimary: AppColors.ink,
+        secondary: AppColors.teal,
+        onSecondary: AppColors.foam,
+        tertiary: AppColors.sunYellow,
+        onTertiary: AppColors.ink,
+        surface: AppColors.deepOcean,
+        onSurface: AppColors.foam,
+        surfaceContainerHighest: AppColors.darkCard,
+      );
+    }
+    return seed.copyWith(
+      primary: AppColors.teal,
+      onPrimary: AppColors.foam,
+      secondary: AppColors.seaGreen,
+      onSecondary: AppColors.ink,
+      tertiary: AppColors.sunYellow,
+      onTertiary: AppColors.ink,
+      surface: AppColors.foam,
+      onSurface: AppColors.ink,
+      surfaceContainerHighest: AppColors.seafoam,
+      onSurfaceVariant: AppColors.inkSoft,
+    );
+  }
+
+  static ThemeData _base(Brightness brightness) {
+    final scheme = _scheme(brightness);
     final base = ThemeData(colorScheme: scheme, useMaterial3: true);
     return base.copyWith(
       appBarTheme: AppBarTheme(
@@ -67,9 +82,9 @@ abstract final class AppTheme {
   }
 }
 
-/// Gradient latar untuk layar terumbu (Home).
+/// Gradient latar untuk layar terumbu (Home) — warna scene, bukan palet UI.
 const LinearGradient reefBackgroundGradient = LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
-  colors: [AppTheme.reefGradientTop, AppTheme.reefGradientBottom],
+  colors: [AppColors.reefSceneTop, AppColors.reefSceneBottom],
 );

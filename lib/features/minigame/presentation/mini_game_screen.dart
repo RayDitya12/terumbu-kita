@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 
 /// Barang untuk mini-game Pilah Cepat (spec.md §6.1 layar 6).
 /// [recyclable] = bisa dipakai ulang (true) atau sekali pakai (false).
@@ -117,7 +117,7 @@ class _MiniGameScreenState extends ConsumerState<MiniGameScreen> {
                   const Icon(
                     Icons.emoji_events,
                     size: 72,
-                    color: AppTheme.coralAccent,
+                    color: AppColors.coralInk,
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -166,7 +166,8 @@ class _MiniGameScreenState extends ConsumerState<MiniGameScreen> {
                         child: FilledButton(
                           key: const Key('answer-once'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppTheme.healthWarn,
+                            backgroundColor: AppColors.sunYellow,
+                            foregroundColor: AppColors.ink,
                             minimumSize: const Size(0, 64),
                           ),
                           onPressed: () => _answer(false),
@@ -178,7 +179,7 @@ class _MiniGameScreenState extends ConsumerState<MiniGameScreen> {
                         child: FilledButton(
                           key: const Key('answer-reuse'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppTheme.reefGradientBottom,
+                            backgroundColor: AppColors.teal,
                             minimumSize: const Size(0, 64),
                           ),
                           onPressed: () => _answer(true),

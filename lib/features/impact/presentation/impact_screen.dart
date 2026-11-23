@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/impact_constants.dart';
 import '../../../core/providers.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/clock.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/action_log.dart';
@@ -45,7 +45,7 @@ class ImpactScreen extends ConsumerWidget {
                     Formatters.grams(totalGrams),
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: AppTheme.reefGradientBottom,
+                      color: AppColors.teal,
                     ),
                   ),
                   Text(AppStrings.impactTotalLabel),
@@ -82,7 +82,7 @@ class ImpactScreen extends ConsumerWidget {
                           Icon(
                             Icons.eco_outlined,
                             size: 40,
-                            color: AppTheme.reefGradientBottom,
+                            color: AppColors.teal,
                           ),
                           const SizedBox(height: 8),
                           Text(
@@ -136,7 +136,7 @@ class ImpactScreen extends ConsumerWidget {
                                   BarChartRodData(
                                     toY: dailyGrams[i],
                                     width: 18,
-                                    color: AppTheme.coralAccent,
+                                    color: AppColors.coral,
                                     borderRadius: BorderRadius.circular(6),
                                     // Label angka di atas tiap bar.
                                     label: BarChartRodLabel(
@@ -146,7 +146,7 @@ class ImpactScreen extends ConsumerWidget {
                                       style: theme.textTheme.labelSmall
                                           ?.copyWith(
                                             fontWeight: FontWeight.w700,
-                                            color: AppTheme.reefGradientBottom,
+                                            color: AppColors.teal,
                                           ),
                                     ),
                                   ),

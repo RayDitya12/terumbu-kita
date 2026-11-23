@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/game_rules.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 
 /// Glowing Choice — layar inti onboarding (spec.md §3.4.1).
 /// Hanya 4 kartu besar, opsi yang disarankan sudah terpilih dan menyala,
@@ -155,13 +155,13 @@ class _HabitCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.coralAccent,
+                          color: AppColors.coral,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           AppStrings.choiceRecommended,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: Colors.black87,
+                            color: AppColors.ink,
                             fontWeight: FontWeight.w700,
                           ),
                         ),

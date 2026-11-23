@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 
 /// Hadiah voucher mock (spec.md §6.1 layar 10).
 /// CD6: kuota terbatas + label "simulasi" — tidak pernah menjanjikan
@@ -35,7 +35,7 @@ class RewardsScreen extends ConsumerWidget {
                         children: [
                           const Icon(
                             Icons.confirmation_number,
-                            color: AppTheme.coralAccent,
+                            color: AppColors.coralInk,
                           ),
                           const SizedBox(width: 8),
                           Expanded(

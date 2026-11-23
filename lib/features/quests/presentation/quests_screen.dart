@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/game_rules.dart';
 import '../../../core/providers.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/chest.dart';
 import '../../../core/utils/clock.dart';
 import '../../../data/models/quest.dart';
@@ -97,7 +97,7 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
                     children: [
                       const Icon(
                         Icons.card_giftcard,
-                        color: AppTheme.coralAccent,
+                        color: AppColors.coralInk,
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -134,9 +134,9 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
           const SizedBox(height: 12),
           // CD6: event musiman (banner simulasi) + pintu mini-game (CD7).
           Card(
-            color: AppTheme.coralTint,
+            color: AppColors.coralTint,
             child: ListTile(
-              iconColor: AppTheme.coralAccent,
+              iconColor: AppColors.coralInk,
               leading: const Icon(Icons.local_activity),
               title: const Text(AppStrings.eventTitle),
               subtitle: const Text(AppStrings.eventBody),
