@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,7 +27,11 @@ class ProfileScreen extends ConsumerWidget {
         .read(settingsProvider.notifier)
         .update(
           settings.copyWith(
-            simulatedDateOffsetDays: settings.simulatedDateOffsetDays + days,
+            // Offset tidak pernah negatif: mundir dibatasi sampai hari asli.
+            simulatedDateOffsetDays: math.max(
+              0,
+              settings.simulatedDateOffsetDays + days,
+            ),
           ),
         );
 
@@ -188,6 +194,14 @@ class ProfileScreen extends ConsumerWidget {
                       FilledButton.tonal(
                         onPressed: () => advance(7),
                         child: const Text(AppStrings.demoAdvance7),
+                      ),
+                      FilledButton.tonal(
+                        onPressed: () => advance(-1),
+                        child: const Text(AppStrings.demoBack1),
+                      ),
+                      FilledButton.tonal(
+                        onPressed: () => advance(-7),
+                        child: const Text(AppStrings.demoBack7),
                       ),
                       FilledButton.tonal(
                         onPressed: () => ref

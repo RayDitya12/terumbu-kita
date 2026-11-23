@@ -214,6 +214,8 @@ abstract final class AppStrings {
       'Untuk presentasi: geser waktu dan isi data contoh.';
   static const demoAdvance1 = 'Maju 1 hari';
   static const demoAdvance7 = 'Maju 7 hari';
+  static const demoBack1 = 'Mundur 1 hari';
+  static const demoBack7 = 'Mundur 7 hari';
   static const demoSampleData = 'Isi data contoh 2 minggu';
   static const demoReset = 'Reset semua data';
   static const demoOffsetLabel = 'Offset waktu saat ini: ';
