@@ -62,7 +62,12 @@ mode Minimal dan menampilkannya sebagai catatan kecil.
 | Penuh | Hemat | Minimal |
 |:---:|:---:|:---:|
 | <img src="docs/screenshots/rumah_penuh.png" width="230" alt="Penuh"> | <img src="docs/screenshots/rumah_hemat.png" width="230" alt="Hemat"> | <img src="docs/screenshots/rumah_minimal.png" width="230" alt="Minimal"> |
-| Shader caustics, 36 gelembung parallax 3 lapis, berkas cahaya sampai dasar, kilatan naik level | Caustics fallback (pita cahaya ter-clip presisi ke bentuk karang & pasir), separuh gelembung, tanpa berkas cahaya | Terumbu beku; animasi hanya feedback singkat saat aksi dicatat |
+
+- **Penuh** — shader caustics, 36 gelembung parallax 3 lapis, berkas cahaya
+  sampai dasar, kilatan naik level.
+- **Hemat** — caustics fallback (pita cahaya ter-clip presisi ke bentuk karang
+  & pasir), separuh gelembung, tanpa berkas cahaya.
+- **Minimal** — terumbu beku; animasi hanya feedback singkat saat aksi dicatat.
 
 Semua angka efek (jumlah gelembung, durasi, dsb.) terpusat di
 `lib/core/constants/visual_config.dart`. Jika shader gagal dimuat, mode Penuh
